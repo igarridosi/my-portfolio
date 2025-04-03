@@ -6,7 +6,7 @@ function index() {
 return (
     <>
         {/* Header */} 
-        <div className="flex justify-center items-center">
+        <div className="flex justify-center items-center mt-5">
             {/*
             <div className="flex justify-between items-center relative z-50">
             <div className="flex items-center space-x-2">

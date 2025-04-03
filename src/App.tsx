@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import Header from './components/Header/index';
 import Section1 from './components/Section1/index';
 import CVSection from './components/CVSection/CVSection';
@@ -31,24 +32,44 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <motion.div 
+      className="min-h-screen bg-background"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <Header />
-      <div className="flex flex-row justify-center items-start mt-5 p-10">
-        <div className="relative bg-gradient-to-br from-gray-100 to-gray-300 p-10 rounded-3xl shadow-2xl border-4 border-black w-[1700px] h-[800px] overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-100 to-gray-300 rounded-3xl blur-md -z-10"></div>
+      <motion.div 
+        className="flex flex-row justify-center items-start mt-3 p-0 sm:p-4 lg:p-12"
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.5 }}
+      >
+        <div className="relative bg-transparent sm:bg-gradient-to-br sm:from-gray-100 sm:to-gray-300 p-2 sm:p-6 lg:p-10 sm:rounded-3xl sm:shadow-black sm:shadow-2xl sm:border-3 sm:border-gray-600 w-full sm:w-[95%] max-w-[1700px] min-h-[750px] overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-100 to-gray-300 rounded-3xl blur-md -z-10 hidden sm:block"></div>
           
           {/* Container principal con contenido que se difumina */}
-          <div className={`flex flex-row justify-between w-full transition-all duration-300 relative ${isBlurred ? 'blur-sm' : ''}`}>
+          <div className={`flex flex-col lg:flex-row justify-between gap-4 sm:gap-6 w-full transition-all duration-300 relative ${isBlurred ? 'blur-sm' : ''}`}>
             {/* Columna izquierda - Contenido */}
-            <div className="w-1/2">
-              <div className="w-[800px] max-h-[700px] overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 no-scrollbar">
+            <motion.div 
+              className="w-full lg:w-[60%] flex justify-center order-1 lg:order-1"
+              initial={{ x: -50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              <div className="w-full max-w-[800px] h-auto sm:h-[500px] lg:h-[700px] overflow-y-auto p-12 sm:p-4 rounded-xl no-scrollbar sm:bg-transparent">
                 {renderSection()}
               </div>
-            </div>
+            </motion.div>
             {/* CV Section */}
-            <div className="w-1/2">
+            <motion.div 
+              className="w-full lg:w-[45%] flex justify-center order-2 lg:order-2 mt-4 lg:mt-0"
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+            >
               <CVSection setActiveSection={setActiveSection} />
-            </div>
+            </motion.div>
           </div>
 
           {/* Menú siempre visible por encima del blur */}
@@ -60,9 +81,15 @@ function App() {
             />
           </div>
         </div>
-      </div>
-      <Footer />
-    </div>
+      </motion.div>
+      <motion.div
+        initial={{ y: 20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ delay: 0.8, duration: 0.5 }}
+      >
+        <Footer />
+      </motion.div>
+    </motion.div>
   );
 }
 

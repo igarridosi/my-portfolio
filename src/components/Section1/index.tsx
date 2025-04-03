@@ -3,18 +3,18 @@ import React from 'react'
 function index() {
 return (
     <>
-    <div className="w-full px-4 py-8">
+    <div className="w-full sm:px-4 sm:py-8">
         <main className="mt-20">
         <h2 className="text-xl uppercase tracking-wider mb-4 font-mono font-bold">
             HEY, I AM IBAI GARRIDO
         </h2>
         <div className="max-w-3xl text-justify">
             <div className="grid grid-cols-1">
-            <h1 className="text-9xl leading-tight font-thin">Web</h1>
-            <h1 className="text-8xl font-bold leading-tight font-serif">
+            <h1 className="sm:text-9xl text-6xl leading-tight font-thin">Web</h1>
+            <h1 className="sm:text-8xl text-5xl font-bold leading-tight font-serif">
                 Application
             </h1>
-            <h1 className="text-6xl leading-tight mb-6 font-mono">
+            <h1 className="sm:text-6xl text-4xl leading-tight mb-6 font-mono">
                 Developer
             </h1>
             </div>
