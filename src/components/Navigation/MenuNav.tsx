@@ -77,11 +77,11 @@ return (
                         onClick={() => handleSectionClick(id)}
                         className={`
                             block relative px-6 py-3 
-                            rounded-full border-2 border-gray-600
+                            rounded-full border-2 border-gray-700
                             transition-all duration-300 cursor-pointer
                             ${activeSection === id 
                                 ? 'bg-gray-700 text-white border-gray-700' 
-                                : 'hover:scale-105 text-gray-800 hover:text-gray-800'
+                                : 'hover:scale-105 bg-gray-200 text-gray-700 hover:text-gray-900'
                             }
                         `}
                     >

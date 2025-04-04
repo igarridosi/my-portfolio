@@ -48,7 +48,7 @@ function App() {
         transition={{ delay: 0.2, duration: 0.5 }}
       >
         {/* Contenedor principal estilo ventana retro */}
-        <div className="relative w-full sm:w-[80%] max-w-[1700px] min-h-[700px] overflow-hidden border-2 border-gray-800 bg-gray-100 rounded-lg sm:rounded-xl">
+        <div className="relative w-full sm:w-[80%] max-w-[1700px] min-h-[700px] overflow-hidden border-3 border-gray-800 bg-gray-100 rounded-lg sm:rounded-xl shadow-[5px_5px_0px_0px_rgba(31,41,55)] sm:shadow-[10px_10px_0px_0px_rgba(31,41,55)]">
           {/* Barra superior estilo retro */}
           <div className="flex items-center h-10 bg-gray-200 border-b-2 border-gray-800 px-4">
             <div className="flex gap-2">

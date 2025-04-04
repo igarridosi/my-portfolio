@@ -20,7 +20,7 @@ const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
 return (
     <section className="relative flex flex-col items-center">
     <motion.div
-        className="relative w-full h-[400px] sm:h-[500px] lg:h-[680px] max-h-[800px] overflow-hidden flex justify-center items-start bg-transparent sm:bg-gradient-to-b sm:from-gray-300 sm:to-white sm:rounded-2xl"
+        className="relative w-full h-[400px] sm:h-[500px] lg:h-[680px] max-h-[800px] overflow-hidden flex justify-center items-start  sm:bg-gradient-to-b sm:from-gray-300 sm:to-white rounded-2xl bg-transparent"
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -31,7 +31,7 @@ return (
         <motion.img
         src="/img/CV_Foto-cut-2.png"
         alt="CV"
-        className="w-auto h-[50vh] sm:h-[60vh] lg:h-[80vh] object-cover filter grayscale object-top scale-80 sm:scale-100"
+        className="w-auto h-[55vh] sm:h-[60vh] lg:h-[80vh] object-cover filter grayscale object-top scale-100"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ 
             opacity: isHovered ? 0.3 : 1,
