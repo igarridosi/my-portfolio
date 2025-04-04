@@ -25,6 +25,7 @@ const Contact = () => {
 
   return (
     <motion.div 
+      id="contact-section"
       className="flex flex-col gap-6 m-3"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -128,40 +129,6 @@ const Contact = () => {
           <span>Send Message</span>
           <BiSend className="text-xl" />
         </motion.button>
-
-        <div className="text-center text-sm text-gray-500 mt-6">
-          <p className="mb-3">Quick links:</p>
-          <div className="flex justify-center gap-8">
-            <motion.a 
-              href="https://github.com/igarridosi" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-gray-600 hover:text-gray-800 transition-colors"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <FaGithub size={22} />
-            </motion.a>
-            <motion.a 
-              href="https://www.linkedin.com/in/ibai-garrido-699826353/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-gray-600 hover:text-gray-800 transition-colors"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <FaLinkedinIn size={22} />
-            </motion.a>
-            <motion.a 
-              href="mailto:garridotab4@gmail.com"
-              className="text-gray-600 hover:text-gray-800 transition-colors"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <MdEmail size={22} />
-            </motion.a>
-          </div>
-        </div>
       </motion.form>
     </motion.div>
   );

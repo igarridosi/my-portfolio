@@ -29,9 +29,9 @@ return (
         onMouseLeave={() => setIsHovered(false)}
     >
         <motion.img
-        src="/img/CV_Foto-cut.png"
+        src="/img/CV_Foto-cut-2.png"
         alt="CV"
-        className="w-auto h-[100vh] sm:h-[130vh] lg:h-[140vh] object-cover filter grayscale object-top scale-77 sm:scale-90"
+        className="w-auto h-[50vh] sm:h-[60vh] lg:h-[80vh] object-cover filter grayscale object-top scale-80 sm:scale-100"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ 
             opacity: isHovered ? 0.3 : 1,

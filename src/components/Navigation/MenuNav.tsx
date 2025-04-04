@@ -45,7 +45,7 @@ return (
         {/* Botón del menú */}
         <button
             onClick={() => handleMenuToggle(!isMenuOpen)}
-            className="absolute top-8 left-8 hover:bg-gray-300 p-1 rounded-full transition-all duration-300 z-[60]"
+            className="absolute top-15 left-5/6 sm:top-25 sm:left-5 hover:bg-gray-300 p-1 rounded-full transition-all duration-300 z-[60]"
         >
             <span className="sr-only">Menu</span>
             <svg
@@ -65,7 +65,7 @@ return (
 
         {/* Menú desplegable centrado */}
         <motion.div 
-            className={`absolute top-80 sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform z-[60] ${isMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
+            className={`absolute top-100 md:top-120 sm:top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 transform z-[60] ${isMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
             variants={menuVariants}
             initial="hidden"
             animate={isMenuOpen ? "visible" : "hidden"}
@@ -77,11 +77,11 @@ return (
                         onClick={() => handleSectionClick(id)}
                         className={`
                             block relative px-6 py-3 
-                            rounded-full border-2 border-gray-400
+                            rounded-full border-2 border-gray-600
                             transition-all duration-300 cursor-pointer
                             ${activeSection === id 
                                 ? 'bg-gray-700 text-white border-gray-700' 
-                                : 'hover:scale-105 text-gray-600 hover:text-gray-800'
+                                : 'hover:scale-105 text-gray-800 hover:text-gray-800'
                             }
                         `}
                     >

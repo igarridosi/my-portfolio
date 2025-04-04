@@ -81,12 +81,17 @@ function Skills() {
                     <span className="text-2xl text-gray-700">{skill.icon}</span>
                     <span className="font-medium text-gray-800">{skill.name}</span>
                   </div>
-                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                  {/* Skill level hidden
+                  <div className="{/*h-2 bg-gray-200 rounded-full overflow-hidden">
+                  Tambien añadir esto al div de dentro:
+                  className="h-full bg-gray-700 rounded-full"
+                  */}
+                  <div>
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${skill.level}%` }}
                       transition={{ duration: 1, delay: (categoryIndex * 0.2) + (index * 0.1) }}
-                      className="h-full bg-gray-700 rounded-full"
+                      className=""
                     />
                   </div>
                 </motion.div>
