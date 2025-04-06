@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import emailjs from '@emailjs/browser';
 import { MdEmail, MdPerson, MdMessage } from 'react-icons/md';
-import { FaGithub, FaLinkedinIn } from 'react-icons/fa';
 import { BiSend } from 'react-icons/bi';
 
 const Contact = () => {
@@ -10,10 +10,32 @@ const Contact = () => {
     email: '',
     message: ''
   });
+  const [status, setStatus] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    setStatus('sending');
+
+    emailjs.send(
+      'service_nxm1abo', // Reemplaza con tu Service ID de EmailJS
+      'template_hqqmp9k', // Reemplaza con tu Template ID
+      {
+        to_email: 'garridotab4@gmail.com',
+        from_name: formData.name,
+        from_email: formData.email,
+        message: formData.message,
+      },
+      'cT9XkYIydkiqGByKR' // Reemplaza con tu Public Key
+    )
+    .then(() => {
+      setStatus('success');
+      setFormData({ name: '', email: '', message: '' });
+      setTimeout(() => setStatus(''), 3000);
+    })
+    .catch(() => {
+      setStatus('error');
+      setTimeout(() => setStatus(''), 3000);
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -122,13 +144,42 @@ const Contact = () => {
 
         <motion.button
           type="submit"
-          className="w-full py-3 px-6 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors duration-300 font-medium flex items-center justify-center gap-2"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          disabled={status === 'sending'}
+          className={`w-full py-3 px-6 ${
+            status === 'sending' 
+              ? 'bg-gray-400' 
+              : 'bg-gray-700 hover:bg-gray-600'
+          } text-white rounded-lg transition-colors duration-300 font-medium flex items-center justify-center gap-2`}
+          whileHover={{ scale: status === 'sending' ? 1 : 1.02 }}
+          whileTap={{ scale: status === 'sending' ? 1 : 0.98 }}
         >
-          <span>Send Message</span>
+          <span>
+            {status === 'sending' 
+              ? 'Sending...' 
+              : 'Send Message'}
+          </span>
           <BiSend className="text-xl" />
         </motion.button>
+
+        {status === 'success' && (
+          <motion.p 
+            className="text-green-600 text-center mt-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            Message sent successfully!
+          </motion.p>
+        )}
+
+        {status === 'error' && (
+          <motion.p 
+            className="text-red-600 text-center mt-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            Failed to send message. Please try again.
+          </motion.p>
+        )}
       </motion.form>
     </motion.div>
   );

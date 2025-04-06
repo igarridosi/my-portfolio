@@ -1,21 +1,192 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
 
-function Projects() {
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <h2 className="text-4xl font-bold mb-6">Projects</h2>
-      <div className="grid gap-6">
-        <div className="border-2 border-gray-200 p-6 rounded-lg">
-          <h3 className="text-2xl font-bold mb-2">Proyecto 1</h3>
-          <p className="text-gray-700">Descripción del proyecto...</p>
-        </div>
-        <div className="border-2 border-gray-200 p-6 rounded-lg">
-          <h3 className="text-2xl font-bold mb-2">Proyecto 2</h3>
-          <p className="text-gray-700">Descripción del proyecto...</p>
-        </div>
-      </div>
-    </div>
-  )
+interface Repository {
+  name: string;
+  description: string;
+  html_url: string;
+  homepage: string;
+  topics: string[];
+  language: string;
 }
 
-export default Projects
+const Projects = () => {
+  const [repos, setRepos] = useState<Repository[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPinnedRepos = async () => {
+      try {
+        const token = import.meta.env.VITE_GITHUB_TOKEN;
+        if (!token) {
+          throw new Error('GitHub token not found in environment variables');
+        }
+
+        const response = await fetch('https://api.github.com/graphql', {
+          method: 'POST',
+          headers: {
+            'Authorization': `bearer ${token}`, // Necesitarás un token de GitHub
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            query: `
+              {
+                user(login: "igarridosi") {
+                  pinnedItems(first: 6, types: REPOSITORY) {
+                    nodes {
+                      ... on Repository {
+                        name
+                        description
+                        url
+                        homepageUrl
+                        repositoryTopics(first: 10) {
+                          nodes {
+                            topic {
+                              name
+                            }
+                          }
+                        }
+                        primaryLanguage {
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            `
+          }),
+        });
+        
+        const data = await response.json();
+        const pinnedRepos = data.data.user.pinnedItems.nodes.map((repo: any) => ({
+          name: repo.name,
+          description: repo.description,
+          html_url: repo.url,
+          homepage: repo.homepageUrl,
+          topics: repo.repositoryTopics.nodes.map((topic: any) => topic.topic.name),
+          language: repo.primaryLanguage?.name
+        }));
+        
+        setRepos(pinnedRepos);
+      } catch (error) {
+        console.error('Error fetching pinned repos:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPinnedRepos();
+  }, []);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-700"></div>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div
+      className="max-w-6xl mx-auto px-4"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
+      <motion.h2 
+        className="text-3xl font-bold text-gray-800 mb-8 text-center"
+        variants={itemVariants}
+      >
+        My Projects
+      </motion.h2>
+
+      <motion.div 
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        variants={containerVariants}
+      >
+        {repos.map((repo) => (
+          <motion.div
+            key={repo.name}
+            className="bg-white p-6 rounded-lg shadow-lg border-2 border-gray-200 hover:border-gray-700 transition-all duration-300"
+            variants={itemVariants}
+            whileHover={{ y: -5 }}
+          >
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+              {repo.name}
+            </h3>
+            
+            <p className="text-gray-600 mb-4 h-20 overflow-y-auto">
+              {repo.description || 'No description available'}
+            </p>
+
+            {repo.topics && repo.topics.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {repo.topics.map((topic) => (
+                  <span
+                    key={topic}
+                    className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full"
+                  >
+                    {topic}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {repo.language && (
+              <div className="mb-4">
+                <span className="inline-flex items-center px-3 py-1 text-sm bg-gray-700 text-white rounded-full">
+                  {repo.language}
+                </span>
+              </div>
+            )}
+
+            <div className="flex gap-4">
+              <a
+                href={repo.html_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
+              >
+                <FaGithub className="text-xl" />
+                <span>Code</span>
+              </a>
+              {repo.homepage && (
+                <a
+                  href={repo.homepage}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
+                >
+                  <FaExternalLinkAlt className="text-lg" />
+                  <span>Live Demo</span>
+                </a>
+              )}
+            </div>
+          </motion.div>
+        ))}
+      </motion.div>
+    </motion.div>
+  );
+};
+
+export default Projects;
