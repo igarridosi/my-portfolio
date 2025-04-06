@@ -121,7 +121,7 @@ function App() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.8, duration: 0.5 }}
       >
-        <Footer />
+        <Footer setActiveSection={setActiveSection} />
       </motion.div>
     </motion.div>
   );

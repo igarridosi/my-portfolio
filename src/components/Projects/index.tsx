@@ -85,7 +85,9 @@ const Projects = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.2
+        duration: 0.5,
+        staggerChildren: 0.15,
+        when: "beforeChildren" // Esto asegura que el contenedor aparezca antes que los hijos
       }
     }
   };
@@ -94,7 +96,11 @@ const Projects = () => {
     hidden: { y: 20, opacity: 0 },
     visible: {
       y: 0,
-      opacity: 1
+      opacity: 1,
+      transition: {
+        duration: 0.4,
+        ease: "easeOut"
+      }
     }
   };
 
@@ -107,29 +113,21 @@ const Projects = () => {
   }
 
   return (
-    <motion.div
-      className="max-w-6xl mx-auto px-4"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
-      <motion.h2 
-        className="text-3xl font-bold text-gray-800 mb-8 text-center"
-        variants={itemVariants}
-      >
-        My Projects
-      </motion.h2>
+    <div className="max-w-6xl mx-auto px-4">
+      <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+        My Pinned Projects
+      </h2>
 
       <motion.div 
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        variants={containerVariants}
+        initial={{ opacity: 0, filter: "blur(10px)" }}
+        animate={{ opacity: 1, filter: "blur(0px)" }}
+        transition={{ duration: 0.7 }}
       >
         {repos.map((repo) => (
           <motion.div
             key={repo.name}
-            className="bg-white p-6 rounded-lg shadow-lg border-2 border-gray-200 hover:border-gray-700 transition-all duration-300"
-            variants={itemVariants}
-            whileHover={{ y: -5 }}
+            className="bg-white p-6 rounded-lg shadow-[5px_5px_0px_0px_rgba(31,41,55)] border-3 border-gray-800 hover:shadow-[8px_8px_0px_0px_rgba(31,41,55)] transition-all duration-200"
           >
             <h3 className="text-xl font-semibold text-gray-800 mb-2">
               {repo.name}
@@ -185,7 +183,7 @@ const Projects = () => {
           </motion.div>
         ))}
       </motion.div>
-    </motion.div>
+    </div>
   );
 };
 
