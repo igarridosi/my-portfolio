@@ -20,7 +20,6 @@ function Skills() {
       skills: [
         { name: "PHP", icon: <FaPhp />, level: 65 },
         { name: "Java", icon: <FaJava />, level: 70 },
-        { name: "Python", icon: <FaPython />, level: 60 },
       ]
     },
     {
