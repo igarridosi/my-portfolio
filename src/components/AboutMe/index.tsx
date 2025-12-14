@@ -22,8 +22,7 @@ const AboutMe = () => {
           About Me
         </h2>
         <p className="text-gray-700 leading-relaxed">
-          I'm a passionate web application development student based in Oiartzun, Spain, 
-          with a strong focus on creating smooth, intuitive, and visually engaging digital experiences.
+          I’m a Junior Developer based in Oiartzun, Spain, driven by the challenge of building functional digital products from scratch. Rather than just writing lines of code, I focus on architecting complete solutions that combine robust logic with seamless user experiences across different platforms.
         </p>
       </motion.div>
 
@@ -39,9 +38,7 @@ const AboutMe = () => {
           Technical Focus
         </h3>
         <p className="text-gray-700 leading-relaxed">
-          I specialize in frontend development, working with HTML, CSS, JavaScript, and React 
-          to build interactive and user-friendly applications. I'm experienced in version control 
-          with Git and GitHub, and I prioritize performance optimization and accessibility standards.
+          My technical expertise spans across platforms. I build dynamic web interfaces using React and Tailwind CSS, develop scalable application logic with a strong core in C#, and create modern native mobile experiences using Kotlin (Jetpack Compose). My GitHub portfolio reflects this versatility, showcasing a wide range of projects, from web tools to mobile apps, where I prioritize clean architecture, performance, and maintainable code.
         </p>
       </motion.div>
 
@@ -57,9 +54,7 @@ const AboutMe = () => {
           Work Approach
         </h3>
         <p className="text-gray-700 leading-relaxed">
-          I thrive in collaborative environments where creativity and problem-solving converge. 
-          I believe the best results come from sharing ideas and learning from each other, 
-          and I'm always eager to improve through collaboration and feedback.
+          I view development as a creative process. While I am capable of troubleshooting, I thrive most when conceptualizing and building new features to solve real-world problems. I leverage version control with Git and GitHub not just to save code, but to manage the evolution of my projects, believing that the best software is built through continuous iteration and clear structure.
         </p>
       </motion.div>
 
@@ -75,9 +70,7 @@ const AboutMe = () => {
           Professional Goals
         </h3>
         <p className="text-gray-700 leading-relaxed">
-          I'm passionate about continuous learning and growth in web development. 
-          Whether it's optimizing performance, experimenting with new design trends, 
-          or collaborating on features, I'm committed to creating exceptional web experiences.
+          I am committed to mastering the ecosystem of mobile and desktop development. My goal is to join a forward-thinking team where I can apply my skills in C# and Kotlin to deliver impactful software. I aim to move beyond simple execution and contribute to the entire lifecycle of creating exceptional digital products.
         </p>
       </motion.div>
     </motion.div>

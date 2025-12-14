@@ -1,33 +1,34 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FaReact, FaHtml5, FaCss3Alt, FaGitAlt, FaGithub, FaJava, FaLaravel, FaPhp, FaPython } from 'react-icons/fa';
-import { SiTypescript, SiTailwindcss, SiJavascript, SiMysql, SiMariadb, SiBootstrap } from 'react-icons/si';
-
+import { SiTypescript, SiTailwindcss, SiJavascript, SiMysql, SiMariadb, SiBootstrap, SiDotnet, SiKotlin, SiJetpackcompose, SiAndroid } from 'react-icons/si';
+import { PiFileCSharp } from "react-icons/pi";
 function Skills() {
   const skillCategories = [
     {
       title: "Frontend Development",
       skills: [
-        { name: "HTML", icon: <FaHtml5 />, level: 90 },
-        { name: "CSS", icon: <FaCss3Alt />, level: 85 },
-        { name: "JavaScript", icon: <SiJavascript />, level: 80 },
         { name: "React", icon: <FaReact />, level: 75 },
+        { name: "JavaScript", icon: <SiJavascript />, level: 80 },
+        { name: "Tailwind CSS", icon: <SiTailwindcss />, level: 85 },
+        { name: "HTML5 / CSS3", icon: <FaHtml5 />, level: 90 },
         { name: "TypeScript", icon: <SiTypescript />, level: 70 },
       ]
     },
     {
-      title: "Backend Development",
+      title: "Backend & Core",
       skills: [
-        { name: "PHP", icon: <FaPhp />, level: 65 },
+        { name: "C#", icon: <PiFileCSharp />, level: 65 },
+        { name: ".NET", icon: <SiDotnet />, level: 70 },
         { name: "Java", icon: <FaJava />, level: 70 },
       ]
     },
     {
-      title: "Frameworks & Libraries",
+      title: "Mobile Development",
       skills: [
-        { name: "Laravel", icon: <FaLaravel />, level: 75 },
-        { name: "Bootstrap", icon: <SiBootstrap />, level: 80 },
-        { name: "Tailwind CSS", icon: <SiTailwindcss />, level: 85 },
+        { name: "Kotlin", icon: <SiKotlin />, level: 75 },
+        { name: "Jetpack Compose", icon: <SiJetpackcompose />, level: 80 },
+        { name: "Android SDK", icon: <SiAndroid />, level: 80 },
       ]
     },
     {

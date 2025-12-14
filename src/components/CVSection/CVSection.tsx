@@ -29,7 +29,7 @@ return (
         onMouseLeave={() => setIsHovered(false)}
     >
         <motion.img
-        src="/img/CV_Foto-cut-2.png"
+        src="/img/Linkedin_Profile_Image_bg_remove.png"
         alt="CV"
         className="w-auto h-[55vh] sm:h-[60vh] lg:h-[80vh] object-cover filter grayscale object-top scale-100"
         initial={{ opacity: 0, scale: 0.95 }}
