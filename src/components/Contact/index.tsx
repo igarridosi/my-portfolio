@@ -8,7 +8,7 @@ import { FaLinkedinIn, FaGithub } from 'react-icons/fa';
 const DIRECT_LINKS = [
   {
     icon: <MdEmail className="text-xl" />,
-    label: 'garridotab4@gmail.com',
+    label: 'Gmail',
     href: 'mailto:garridotab4@gmail.com',
   },
   {
