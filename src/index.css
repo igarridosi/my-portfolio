@@ -1,11 +1,19 @@
 @import "tailwindcss";
 
 @layer utilities {
-    .no-scrollbar::-webkit-scrollbar {
+  .no-scrollbar::-webkit-scrollbar {
     display: none;
-    }
-    .no-scrollbar {
+  }
+  .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
-    }
+  }
+}
+
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.cursor-blink {
+  animation: blink-cursor 0.8s step-end infinite;
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaGithub, FaExternalLinkAlt } from 'react-icons/fa';
 
@@ -11,103 +11,119 @@ interface Repository {
   language: string;
 }
 
+const GRAPHQL_QUERY = `{
+  user(login: "igarridosi") {
+    pinnedItems(first: 6, types: REPOSITORY) {
+      nodes {
+        ... on Repository {
+          name
+          description
+          url
+          homepageUrl
+          repositoryTopics(first: 10) {
+            nodes { topic { name } }
+          }
+          primaryLanguage { name }
+        }
+      }
+    }
+  }
+}`;
+
+const parseRepos = (nodes: any[]): Repository[] =>
+  nodes.map((repo) => ({
+    name: repo.name,
+    description: repo.description,
+    html_url: repo.url,
+    homepage: repo.homepageUrl,
+    topics: repo.repositoryTopics.nodes.map((t: any) => t.topic.name),
+    language: repo.primaryLanguage?.name ?? null,
+  }));
+
+const SkeletonCard = () => (
+  <div className="bg-white p-6 rounded-lg border-2 border-gray-200 animate-pulse">
+    <div className="h-5 bg-gray-200 rounded w-3/4 mb-3" />
+    <div className="space-y-2 mb-5 h-20">
+      <div className="h-3.5 bg-gray-200 rounded w-full" />
+      <div className="h-3.5 bg-gray-200 rounded w-5/6" />
+      <div className="h-3.5 bg-gray-200 rounded w-4/6" />
+    </div>
+    <div className="flex gap-2 mb-4">
+      <div className="h-6 bg-gray-200 rounded-full w-20" />
+      <div className="h-6 bg-gray-200 rounded-full w-16" />
+    </div>
+    <div className="h-6 bg-gray-200 rounded-full w-20 mb-4" />
+    <div className="flex gap-4">
+      <div className="h-4 bg-gray-200 rounded w-14" />
+      <div className="h-4 bg-gray-200 rounded w-20" />
+    </div>
+  </div>
+);
+
 const Projects = () => {
   const [repos, setRepos] = useState<Repository[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    const fetchPinnedRepos = async () => {
+    const fetchRepos = async () => {
       try {
-        const token = import.meta.env.VITE_GITHUB_TOKEN;
-        if (!token) {
-          throw new Error('GitHub token not found in environment variables');
+        let repos: Repository[];
+
+        if (import.meta.env.DEV && import.meta.env.VITE_GITHUB_TOKEN) {
+          const res = await fetch('https://api.github.com/graphql', {
+            method: 'POST',
+            headers: {
+              Authorization: `bearer ${import.meta.env.VITE_GITHUB_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ query: GRAPHQL_QUERY }),
+          });
+          const json = await res.json();
+          if (json.errors) throw new Error(json.errors[0].message);
+          repos = parseRepos(json.data.user.pinnedItems.nodes);
+        } else {
+          const res = await fetch('/.netlify/functions/github-repos');
+          if (!res.ok) throw new Error('Function error');
+          repos = await res.json();
         }
 
-        const response = await fetch('https://api.github.com/graphql', {
-          method: 'POST',
-          headers: {
-            'Authorization': `bearer ${token}`, // Necesitarás un token de GitHub
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            query: `
-              {
-                user(login: "igarridosi") {
-                  pinnedItems(first: 6, types: REPOSITORY) {
-                    nodes {
-                      ... on Repository {
-                        name
-                        description
-                        url
-                        homepageUrl
-                        repositoryTopics(first: 10) {
-                          nodes {
-                            topic {
-                              name
-                            }
-                          }
-                        }
-                        primaryLanguage {
-                          name
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            `
-          }),
-        });
-        
-        const data = await response.json();
-        const pinnedRepos = data.data.user.pinnedItems.nodes.map((repo: any) => ({
-          name: repo.name,
-          description: repo.description,
-          html_url: repo.url,
-          homepage: repo.homepageUrl,
-          topics: repo.repositoryTopics.nodes.map((topic: any) => topic.topic.name),
-          language: repo.primaryLanguage?.name
-        }));
-        
-        setRepos(pinnedRepos);
-      } catch (error) {
-        console.error('Error fetching pinned repos:', error);
+        setRepos(repos);
+      } catch {
+        setError(true);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchPinnedRepos();
+    fetchRepos();
   }, []);
-
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.5,
-        staggerChildren: 0.15,
-        when: "beforeChildren" // Esto asegura que el contenedor aparezca antes que los hijos
-      }
-    }
-  };
-
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.4,
-        ease: "easeOut"
-      }
-    }
-  };
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-gray-700"></div>
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="h-9 bg-gray-200 rounded w-52 mx-auto mb-8 animate-pulse" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[1, 2, 3, 4].map(i => <SkeletonCard key={i} />)}
+        </div>
+      </div>
+    );
+  }
+
+  if (error || repos.length === 0) {
+    return (
+      <div className="flex flex-col justify-center items-center h-96 gap-4 text-center px-4">
+        <FaGithub className="text-5xl text-gray-400" />
+        <p className="text-gray-600 text-lg">Could not load projects right now.</p>
+        <a
+          href="https://github.com/igarridosi"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-4 py-2 border-2 border-gray-800 bg-white hover:bg-gray-800 hover:text-white transition-colors duration-200 font-medium"
+        >
+          <FaGithub />
+          View GitHub profile
+        </a>
       </div>
     );
   }
@@ -117,39 +133,30 @@ const Projects = () => {
       <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
         My Pinned Projects
       </h2>
-
-      <motion.div 
+      <motion.div
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
-        initial={{ opacity: 0, filter: "blur(10px)" }}
-        animate={{ opacity: 1, filter: "blur(0px)" }}
+        initial={{ opacity: 0, filter: 'blur(10px)' }}
+        animate={{ opacity: 1, filter: 'blur(0px)' }}
         transition={{ duration: 0.7 }}
       >
         {repos.map((repo) => (
           <motion.div
             key={repo.name}
-            className="bg-white p-6 rounded-lg shadow-[5px_5px_0px_0px_rgba(31,41,55)] border-3 border-gray-800 hover:shadow-[8px_8px_0px_0px_rgba(31,41,55)] transition-all duration-200"
+            className="bg-white p-6 rounded-lg shadow-[5px_5px_0px_0px_rgba(31,41,55)] border-2 border-gray-800 hover:shadow-[8px_8px_0px_0px_rgba(31,41,55)] transition-all duration-200"
           >
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">
-              {repo.name}
-            </h3>
-            
+            <h3 className="text-xl font-semibold text-gray-800 mb-2">{repo.name}</h3>
             <p className="text-gray-600 mb-4 h-20 overflow-y-auto">
               {repo.description || 'No description available'}
             </p>
-
-            {repo.topics && repo.topics.length > 0 && (
+            {repo.topics?.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {repo.topics.map((topic) => (
-                  <span
-                    key={topic}
-                    className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full"
-                  >
+                  <span key={topic} className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded-full">
                     {topic}
                   </span>
                 ))}
               </div>
             )}
-
             {repo.language && (
               <div className="mb-4">
                 <span className="inline-flex items-center px-3 py-1 text-sm bg-gray-700 text-white rounded-full">
@@ -157,26 +164,15 @@ const Projects = () => {
                 </span>
               </div>
             )}
-
             <div className="flex gap-4">
-              <a
-                href={repo.html_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
-              >
-                <FaGithub className="text-xl" />
-                <span>Code</span>
+              <a href={repo.html_url} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors">
+                <FaGithub className="text-xl" /><span>Code</span>
               </a>
               {repo.homepage && (
-                <a
-                  href={repo.homepage}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors"
-                >
-                  <FaExternalLinkAlt className="text-lg" />
-                  <span>Live Demo</span>
+                <a href={repo.homepage} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-gray-700 hover:text-gray-900 transition-colors">
+                  <FaExternalLinkAlt className="text-lg" /><span>Live Demo</span>
                 </a>
               )}
             </div>

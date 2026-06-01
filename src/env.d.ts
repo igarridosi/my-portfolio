@@ -1,6 +1,8 @@
 interface ImportMetaEnv {
-  readonly VITE_GITHUB_TOKEN: string
-  // Agrega aquí otras variables de entorno si las necesitas
+  readonly VITE_EMAILJS_SERVICE_ID: string
+  readonly VITE_EMAILJS_TEMPLATE_ID: string
+  readonly VITE_EMAILJS_PUBLIC_KEY: string
+  readonly VITE_GITHUB_TOKEN?: string
 }
 
 interface ImportMeta {
