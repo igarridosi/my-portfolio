@@ -103,7 +103,7 @@ const Projects = () => {
     return (
       <div className="max-w-6xl mx-auto px-4">
         <div className="h-9 bg-gray-200 rounded w-52 mx-auto mb-8 animate-pulse" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {[1, 2, 3, 4].map(i => <SkeletonCard key={i} />)}
         </div>
       </div>
@@ -130,11 +130,11 @@ const Projects = () => {
 
   return (
     <div className="max-w-6xl mx-auto px-4">
-      <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+      <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4 sm:mb-8 text-center">
         My Pinned Projects
       </h2>
       <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6"
         initial={{ opacity: 0, filter: 'blur(10px)' }}
         animate={{ opacity: 1, filter: 'blur(0px)' }}
         transition={{ duration: 0.7 }}
@@ -142,10 +142,10 @@ const Projects = () => {
         {repos.map((repo) => (
           <motion.div
             key={repo.name}
-            className="bg-white p-6 rounded-lg shadow-[5px_5px_0px_0px_rgba(31,41,55)] border-2 border-gray-800 hover:shadow-[8px_8px_0px_0px_rgba(31,41,55)] transition-all duration-200"
+            className="bg-white p-4 sm:p-6 rounded-lg shadow-[3px_3px_0px_0px_rgba(31,41,55)] sm:shadow-[5px_5px_0px_0px_rgba(31,41,55)] border-2 border-gray-800 hover:shadow-[5px_5px_0px_0px_rgba(31,41,55)] sm:hover:shadow-[8px_8px_0px_0px_rgba(31,41,55)] transition-all duration-200"
           >
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">{repo.name}</h3>
-            <p className="text-gray-600 mb-4 h-20 overflow-y-auto">
+            <h3 className="text-base sm:text-xl font-semibold text-gray-800 mb-2">{repo.name}</h3>
+            <p className="text-gray-600 mb-4 text-sm sm:text-base h-16 sm:h-20 overflow-y-auto">
               {repo.description || 'No description available'}
             </p>
             {repo.topics?.length > 0 && (

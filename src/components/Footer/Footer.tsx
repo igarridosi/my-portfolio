@@ -4,8 +4,8 @@ import { MdEmail } from 'react-icons/md';
 import { motion } from 'framer-motion';
 
 const socialLinks = [
-  { id: 'linkedin', label: 'Linkedin', icon: <FaLinkedinIn size={30} />, url: 'https://www.linkedin.com/in/ibai-garrido-699826353/' },
-  { id: 'github', label: 'Github', icon: <FaGithub size={30} />, url: 'https://github.com/igarridosi' },
+  { id: 'linkedin', label: 'Linkedin', icon: <FaLinkedinIn className="text-xl sm:text-3xl" />, url: 'https://www.linkedin.com/in/ibai-garrido-699826353/' },
+  { id: 'github', label: 'Github', icon: <FaGithub className="text-xl sm:text-3xl" />, url: 'https://github.com/igarridosi' },
 ];
 
 function Footer() {
@@ -32,8 +32,8 @@ function Footer() {
           >
             <span className="absolute inset-0 bg-gray-700 transition-all duration-300 transform scale-0 group-hover:scale-100" />
             <span className="relative z-10 transition-all duration-300">
-              <span className="text-gray-700 group-hover:hidden text-sm sm:text-base lg:text-lg">{icon}</span>
-              <span className="hidden group-hover:block text-white text-sm sm:text-lg lg:text-xl font-bold">{label}</span>
+              <span className="text-gray-700 group-hover:hidden">{icon}</span>
+              <span className="hidden group-hover:block text-white text-xs sm:text-lg lg:text-xl font-bold">{label}</span>
             </span>
           </motion.a>
         ))}
@@ -50,8 +50,8 @@ function Footer() {
         >
           <span className="absolute inset-0 bg-gray-700 transition-all duration-300 transform scale-0 group-hover:scale-100" />
           <span className="relative z-10 transition-all duration-300">
-            <span className="text-gray-700 group-hover:hidden text-sm sm:text-base lg:text-lg"><MdEmail size={30} /></span>
-            <span className="hidden group-hover:block text-white text-sm sm:text-lg lg:text-xl font-bold">Gmail</span>
+            <span className="text-gray-700 group-hover:hidden"><MdEmail className="text-xl sm:text-3xl" /></span>
+            <span className="hidden group-hover:block text-white text-xs sm:text-lg lg:text-xl font-bold">Gmail</span>
           </span>
         </motion.button>
       </div>

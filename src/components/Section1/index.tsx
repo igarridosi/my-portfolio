@@ -56,25 +56,25 @@ const Section1 = () => {
         </p>
 
         {/* Main heading */}
-        <div className="leading-none mb-5">
-          <h1 className="sm:text-9xl text-6xl font-thin flex items-center gap-3 text-gray-900">
+        <div className="leading-none mb-4 sm:mb-5">
+          <h1 className="text-4xl sm:text-6xl lg:text-9xl font-thin flex items-center gap-2 sm:gap-3 text-gray-900">
             <FaCode className="text-gray-800" />
             Fullstack
           </h1>
-          <h1 className="sm:text-8xl text-5xl font-bold font-serif text-gray-900">
+          <h1 className="text-3xl sm:text-5xl lg:text-8xl font-bold font-serif text-gray-900">
             Application
           </h1>
-          <h1 className="sm:text-6xl text-4xl font-mono text-gray-900 mt-5">
+          <h1 className="text-2xl sm:text-4xl lg:text-6xl font-mono text-gray-900 mt-3 sm:mt-5">
             {typedText}<span className="cursor-blink">|</span>
           </h1>
         </div>
 
         {/* Professional tagline */}
-        <div className="mb-8 space-y-1">
-          <p className="text-base sm:text-lg text-gray-700 font-medium">
+        <div className="mb-6 sm:mb-8 space-y-1">
+          <p className="text-sm sm:text-base lg:text-lg text-gray-700 font-medium">
             End-to-end products — web, backend &amp; mobile.
           </p>
-          <p className="text-sm font-mono text-gray-400 flex items-center gap-2">
+          <p className="text-xs sm:text-sm font-mono text-gray-400 flex items-center gap-2 flex-wrap">
             <span>Oiartzun, Spain</span>
             <span className="text-gray-300">·</span>
             <span className="text-green-600 font-semibold">Available for hire</span>
@@ -82,33 +82,33 @@ const Section1 = () => {
         </div>
 
         {/* CTA buttons */}
-        <div className="flex flex-wrap gap-3 mb-6">
+        <div className="flex flex-wrap gap-3 mb-4 sm:mb-6">
           <motion.button
             onClick={() => navigate('/contact')}
-            className="px-7 py-3.5 bg-transparent rounded-lg border-2 border-gray-800
+            className="px-5 py-2.5 sm:px-7 sm:py-3.5 bg-transparent rounded-lg border-2 border-gray-800
                     shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]
                     hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px]
                     transition-all duration-300"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <span className="inline-flex items-center gap-2 text-base font-bold text-gray-800">
+            <span className="inline-flex items-center gap-2 text-sm sm:text-base font-bold text-gray-800">
               Get in Touch
               <FaEnvelope />
             </span>
           </motion.button>
 
           <motion.a
-            href="/cv/ibai-garrido-cv.pdf"
+            href="/cv/Ibai_Garrido_CV.pdf"
             download="Ibai_Garrido_CV.pdf"
-            className="px-7 py-3.5 bg-transparent rounded-lg border-2 border-gray-800
+            className="px-5 py-2.5 sm:px-7 sm:py-3.5 bg-transparent rounded-lg border-2 border-gray-800
                     shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]
                     hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px]
-                    transition-all duration-300 inline-flex items-center gap-2 text-base font-bold text-white"
+                    transition-all duration-300 inline-flex items-center gap-2"
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <span className="inline-flex items-center gap-2 text-base font-bold text-gray-800">
+            <span className="inline-flex items-center gap-2 text-sm sm:text-base font-bold text-gray-800">
               Download CV
               <FaDownload />
             </span>

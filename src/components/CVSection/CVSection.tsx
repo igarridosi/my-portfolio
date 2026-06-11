@@ -18,8 +18,7 @@ const CVSection = () => {
   return (
     <section className="relative flex flex-col items-center w-full">
       <motion.div
-        className="relative w-full overflow-hidden flex justify-center items-start sm:bg-gradient-to-b sm:from-gray-300 sm:to-white rounded-2xl bg-transparent"
-        style={{ height: 'clamp(300px, calc(100vh - 330px), 780px)' }}
+        className="relative w-full overflow-hidden flex justify-center items-start bg-gradient-to-b from-gray-300 to-white rounded-2xl cv-height"
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5 }}
@@ -30,7 +29,7 @@ const CVSection = () => {
         <motion.img
           src="/img/Linkedin_Profile_Image_bg_remove.png"
           alt="Ibai Garrido"
-          className="w-auto h-[55vh] sm:h-[60vh] lg:h-[80vh] object-cover filter grayscale object-top scale-100"
+          className="w-auto h-[55vh] sm:h-[60vh] lg:h-[80vh] object-cover filter grayscale object-top"
           fetchPriority="high"
           decoding="async"
           initial={{ opacity: 0, scale: 0.95 }}

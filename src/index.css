@@ -8,6 +8,27 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  .content-height {
+    height: auto;
+  }
+  @media (min-width: 1024px) {
+    .content-height {
+      height: clamp(300px, calc(100vh - 330px), 780px);
+    }
+  }
+  .cv-height {
+    height: 50vh;
+  }
+  @media (min-width: 640px) {
+    .cv-height {
+      height: 60vh;
+    }
+  }
+  @media (min-width: 1024px) {
+    .cv-height {
+      height: clamp(300px, calc(100vh - 330px), 780px);
+    }
+  }
 }
 
 @keyframes blink-cursor {

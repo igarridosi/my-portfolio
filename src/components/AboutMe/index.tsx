@@ -55,14 +55,14 @@ const AboutMe = () => {
 
       <motion.div {...fadeUp(0.2)} className="space-y-2">
         <p className="text-xs uppercase tracking-widest text-gray-400 font-mono">What I build with</p>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {stack.map(({ icon, label, sub }) => (
             <div key={label}
-              className="flex flex-col items-center gap-1.5 p-3 border-2 border-gray-800 bg-white shadow-[3px_3px_0px_0px_rgba(31,41,55)] text-center"
+              className="flex flex-col items-center gap-1 sm:gap-1.5 p-2 sm:p-3 border-2 border-gray-800 bg-white shadow-[3px_3px_0px_0px_rgba(31,41,55)] text-center"
             >
               <span className="text-gray-700">{icon}</span>
-              <span className="font-bold text-sm text-gray-800">{label}</span>
-              <span className="text-xs text-gray-500 font-mono">{sub}</span>
+              <span className="font-bold text-xs sm:text-sm text-gray-800">{label}</span>
+              <span className="text-[10px] sm:text-xs text-gray-500 font-mono">{sub}</span>
             </div>
           ))}
         </div>
