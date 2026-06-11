@@ -49,7 +49,7 @@ const AboutMe = () => {
           <span className="font-bold">I build across three.</span>
         </p>
         <p className="text-gray-600 leading-relaxed">
-          I'm a Junior Developer based in Oiartzun, Spain, focused on delivering end-to-end digital products — web interfaces, server logic, and native mobile apps — all from a single developer.
+          I'm a Fullstack Developer based in Oiartzun, Spain, focused on delivering end-to-end digital products, web interfaces, backend logic, and native mobile apps, all from a single developer.
         </p>
       </motion.div>
 

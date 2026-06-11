@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://www.your-next-web-developer.dev/sitemap.xml
+Sitemap: https://www.your-next-developer.dev/sitemap.xml
