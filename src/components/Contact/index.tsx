@@ -78,7 +78,10 @@ const Contact = () => {
           Let's Connect
         </motion.h2>
         <p className="text-gray-500 text-sm">
-          Looking for a developer? I'd love to hear about your project.
+          Looking for a developer? I'd love to hear about the role.
+        </p>
+        <p className="text-xs font-mono text-gray-400">
+          Prague · On-site, hybrid, or remote across Europe
         </p>
       </div>
 

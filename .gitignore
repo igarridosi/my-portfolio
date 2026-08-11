@@ -13,6 +13,10 @@ dist-ssr
 
 .env
 
+# Full-resolution source artwork for the project screenshots.
+# The optimised WebP versions live in public/img/projects and are committed.
+design-assets
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

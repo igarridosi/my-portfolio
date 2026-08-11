@@ -6,6 +6,7 @@ import Header from './components/Header/index';
 import Section1 from './components/Section1/index';
 import CVSection from './components/CVSection/CVSection';
 import AboutMe from './components/AboutMe';
+import Experience from './components/Experience';
 import Projects from './components/Projects';
 import Skills from './components/Skills';
 import MenuNav from './components/Navigation/MenuNav';
@@ -16,6 +17,7 @@ function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const displayUrl = `https://www.your-next-developer.dev${location.pathname}`;
+  const isHome = location.pathname === '/';
 
   return (
     <motion.div
@@ -69,20 +71,29 @@ function AppLayout() {
           {/* Navigation bookmarks bar */}
           <MenuNav />
 
-          {/* Main content */}
+          {/* Main content. The photo only earns its space on the landing page;
+              every other route gets the full width for actual content. */}
           <div className="p-3 sm:p-6 lg:p-10 bg-white">
-            <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-4 sm:gap-6 w-full">
-              {/* Left column */}
+            <div
+              className={`grid grid-cols-1 gap-4 sm:gap-6 w-full ${
+                isHome ? 'lg:grid-cols-[3fr_2fr]' : ''
+              }`}
+            >
               <motion.div
                 className="flex justify-center"
                 initial={{ x: -50, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
               >
-                <div className="w-full max-w-[800px] overflow-y-auto p-2 sm:p-6 md:px-8 rounded-xl no-scrollbar content-height">
+                <div
+                  className={`w-full overflow-y-auto p-2 sm:p-6 md:px-8 rounded-xl no-scrollbar content-height ${
+                    isHome ? 'max-w-[800px]' : 'max-w-[1100px]'
+                  }`}
+                >
                   <Routes>
                     <Route path="/" element={<Section1 />} />
                     <Route path="/about" element={<AboutMe />} />
+                    <Route path="/experience" element={<Experience />} />
                     <Route path="/projects" element={<Projects />} />
                     <Route path="/skills" element={<Skills />} />
                     <Route path="/contact" element={<Contact />} />
@@ -91,15 +102,16 @@ function AppLayout() {
                 </div>
               </motion.div>
 
-              {/* Right column — CV photo */}
-              <motion.div
-                className="flex justify-center"
-                initial={{ x: 50, opacity: 0 }}
-                animate={{ x: 0, opacity: 1 }}
-                transition={{ delay: 0.6, duration: 0.5 }}
-              >
-                <CVSection />
-              </motion.div>
+              {isHome && (
+                <motion.div
+                  className="flex justify-center"
+                  initial={{ x: 50, opacity: 0 }}
+                  animate={{ x: 0, opacity: 1 }}
+                  transition={{ delay: 0.6, duration: 0.5 }}
+                >
+                  <CVSection />
+                </motion.div>
+              )}
             </div>
           </div>
         </div>
