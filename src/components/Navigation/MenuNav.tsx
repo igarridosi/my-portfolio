@@ -3,6 +3,7 @@ import { NavLink } from 'react-router-dom';
 const navItems = [
   { path: '/', label: 'Home' },
   { path: '/about', label: 'About' },
+  { path: '/experience', label: 'Experience' },
   { path: '/projects', label: 'Projects' },
   { path: '/skills', label: 'Skills' },
   { path: '/contact', label: 'Contact' },
@@ -17,7 +18,7 @@ const MenuNav = () => {
           to={path}
           end={path === '/'}
           className={({ isActive }) =>
-            `px-2 sm:px-3 py-0.5 sm:py-1 text-[11px] sm:text-sm font-medium border border-gray-800 whitespace-nowrap transition-colors duration-150 font-mono
+            `px-1.5 sm:px-3 py-0.5 sm:py-1 text-[11px] sm:text-sm font-medium border border-gray-800 whitespace-nowrap transition-colors duration-150 font-mono
             ${isActive
               ? 'bg-gray-800 text-white'
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'

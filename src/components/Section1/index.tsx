@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaEnvelope, FaCode, FaDownload, FaLinkedinIn, FaGithub } from 'react-icons/fa';
+import { FaEnvelope, FaCode, FaDownload, FaLinkedinIn, FaGithub, FaMapMarkerAlt } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 
 const ROLES = ['Developer', 'Engineer', 'Builder'];
@@ -70,14 +70,18 @@ const Section1 = () => {
         </div>
 
         {/* Professional tagline */}
-        <div className="mb-6 sm:mb-8 space-y-1">
+        <div className="mb-6 sm:mb-8 space-y-2">
           <p className="text-sm sm:text-base lg:text-lg text-gray-700 font-medium">
-            End-to-end products — web, backend &amp; mobile.
+            High-concurrency desktop apps and data-heavy web platforms.
           </p>
           <p className="text-xs sm:text-sm font-mono text-gray-400 flex items-center gap-2 flex-wrap">
-            <span>Oiartzun, Spain</span>
+            <FaMapMarkerAlt className="text-gray-400" />
+            <span>Prague, Czech Republic</span>
             <span className="text-gray-300">·</span>
-            <span className="text-green-600 font-semibold">Available for hire</span>
+            <span className="text-green-600 font-semibold">Open to work</span>
+          </p>
+          <p className="text-xs font-mono text-gray-500">
+            On-site or hybrid in Prague · Remote across Europe
           </p>
         </div>
 

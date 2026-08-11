@@ -27,7 +27,7 @@ const CVSection = () => {
         onMouseLeave={() => setIsHovered(false)}
       >
         <motion.img
-          src="/img/Linkedin_Profile_Image_bg_remove.png"
+          src="/img/Linkedin_Profile_Image_bg_remove.webp"
           alt="Ibai Garrido"
           className="w-auto h-[55vh] sm:h-[60vh] lg:h-[80vh] object-cover filter grayscale object-top"
           fetchPriority="high"
