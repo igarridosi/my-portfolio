@@ -8,6 +8,11 @@ export interface Gallery {
   layout: 'landscape' | 'portrait';
   /** Tailwind background class behind the slide; should match the artwork */
   bg: string;
+  /**
+   * How the first slide is framed on the card. `cover` fills the frame, which
+   * suits screenshots; `contain` shows the artwork whole, which a logo needs.
+   */
+  posterFit?: 'cover' | 'contain';
 }
 
 export interface Project {
@@ -23,6 +28,8 @@ export interface Project {
   category: 'Web' | 'Backend' | 'Mobile' | 'Desktop';
   repo: string;
   demo?: string;
+  /** Where to get the built app, for projects that ship a binary rather than a URL */
+  download?: string;
   /**
    * Projects with a gallery render as large cards with a quick-look carousel.
    * Projects without one render in the compact row underneath.
@@ -42,10 +49,14 @@ export const projects: Project[] = [
     demo: 'https://huntrvalue.me/',
     gallery: {
       images: [
-        '/img/projects/huntr-1.webp',
-        '/img/projects/huntr-2.webp',
-        '/img/projects/huntr-3.webp',
-        '/img/projects/huntr-4.webp',
+        '/img/projects/landing_page.webp',
+        '/img/projects/chart_kpis.webp',
+        '/img/projects/dcf_calculator_ui.webp',
+        '/img/projects/earnings_calendar.webp',
+        '/img/projects/insights_view.webp',
+        '/img/projects/stock_radar.webp',
+        '/img/projects/stock_info.webp',
+        '/img/projects/portfolio_view.webp',
       ],
       layout: 'landscape',
       bg: 'bg-[#0d0d0f]',
@@ -59,15 +70,17 @@ export const projects: Project[] = [
     stack: ['Kotlin', 'Jetpack Compose', 'Android SDK'],
     category: 'Mobile',
     repo: 'https://github.com/igarridosi/OroiApp',
+    download: 'https://appteka.store/app/811r289712',
     gallery: {
       images: [
+        '/img/projects/logo.webp',
         '/img/projects/oroi-1.webp',
         '/img/projects/oroi-2.webp',
         '/img/projects/oroi-3.webp',
-        '/img/projects/oroi-4.webp',
       ],
       layout: 'portrait',
       bg: 'bg-[#ece8fd]',
+      posterFit: 'contain',
     },
   },
   {

@@ -1,30 +1,54 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
-import { FaGithub, FaExternalLinkAlt, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import {
+  FaGithub,
+  FaExternalLinkAlt,
+  FaChevronLeft,
+  FaChevronRight,
+  FaDownload,
+} from 'react-icons/fa';
+import { IoClose, IoExpand, IoLockClosed } from 'react-icons/io5';
 import { projects, type Project, type Gallery } from '../../data/projects';
 
 const AUTOPLAY_MS = 5000;
 
+/** How long the lightbox exit runs before the overlay is unmounted. */
+const CLOSE_MS = 260;
+
+/** Soft decelerating curve. Everything in this section shares it so the
+ *  motion reads as one system rather than a pile of separate effects. */
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+/** Address-bar text: the live site when there is one, otherwise the repo. */
+const displayUrl = (project: Project) =>
+  (project.demo ?? project.repo).replace(/^https?:\/\//, '').replace(/\/$/, '');
+
 /* ------------------------------------------------------------------ */
-/* Quick-look carousel                                                 */
+/* Slide state                                                         */
 /* ------------------------------------------------------------------ */
 
-const Carousel = ({ gallery, name }: { gallery: Gallery; name: string }) => {
+const useSlides = (total: number) => {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(0);
   const [paused, setPaused] = useState(false);
-  const total = gallery.images.length;
   const reduceMotion = useReducedMotion();
 
-  const go = (step: number) => {
-    setDirection(step);
-    setIndex((i) => (i + step + total) % total);
-  };
+  const go = useCallback(
+    (step: number) => {
+      setDirection(step);
+      setIndex((i) => (i + step + total) % total);
+    },
+    [total],
+  );
 
-  const jumpTo = (i: number) => {
-    setDirection(i > index ? 1 : -1);
-    setIndex(i);
-  };
+  const jumpTo = useCallback(
+    (i: number) => {
+      setDirection(i > index ? 1 : -1);
+      setIndex(i);
+    },
+    [index],
+  );
 
   // Advance on its own. Depending on `index` restarts the clock after any
   // manual navigation, so a click always buys a full interval.
@@ -37,141 +61,422 @@ const Carousel = ({ gallery, name }: { gallery: Gallery; name: string }) => {
     return () => clearInterval(id);
   }, [paused, reduceMotion, total, index]);
 
-  // Portrait phone mockups need a tall frame or the UI inside becomes illegible.
-  const frame =
-    gallery.layout === 'portrait' ? 'h-[420px] sm:h-[560px]' : 'aspect-video';
+  return { index, direction, setPaused, go, jumpTo, reduceMotion };
+};
 
+const slideVariants = {
+  enter: (d: number) => ({ opacity: 0, x: d > 0 ? 44 : -44, scale: 0.985 }),
+  center: { opacity: 1, x: 0, scale: 1 },
+  exit: (d: number) => ({ opacity: 0, x: d > 0 ? -44 : 44, scale: 0.985 }),
+};
+
+/* ------------------------------------------------------------------ */
+/* Window chrome: traffic lights + address bar                         */
+/* ------------------------------------------------------------------ */
+
+const TrafficLights = ({ onClose }: { onClose?: () => void }) => {
+  const dot = 'w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-gray-800';
   return (
-    <div
-      className={`relative w-full overflow-hidden border-b-2 border-gray-800 group ${frame} ${gallery.bg}`}
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocusCapture={() => setPaused(true)}
-      onBlurCapture={() => setPaused(false)}
-    >
-      <AnimatePresence initial={false} custom={direction} mode="popLayout">
-        <motion.img
-          key={index}
-          src={gallery.images[index]}
-          alt={`${name}, view ${index + 1} of ${total}`}
-          loading="lazy"
-          decoding="async"
-          custom={direction}
-          initial={{ opacity: 0, x: direction > 0 ? 40 : -40 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: direction > 0 ? -40 : 40 }}
-          transition={{ duration: 0.28, ease: 'easeOut' }}
-          className="absolute inset-0 w-full h-full object-contain"
+    <div className="flex gap-1.5 sm:gap-2">
+      {onClose ? (
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="Close gallery"
+          className={`${dot} bg-red-500 hover:bg-red-400 transition-colors duration-200`}
         />
-      </AnimatePresence>
-
-      {/* Prev / next */}
-      <button
-        type="button"
-        onClick={() => go(-1)}
-        aria-label={`Previous ${name} screenshot`}
-        className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center
-          bg-white/85 hover:bg-white text-gray-800 border-2 border-gray-800 rounded
-          opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100
-          transition-opacity duration-200"
-      >
-        <FaChevronLeft className="text-xs" />
-      </button>
-      <button
-        type="button"
-        onClick={() => go(1)}
-        aria-label={`Next ${name} screenshot`}
-        className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center
-          bg-white/85 hover:bg-white text-gray-800 border-2 border-gray-800 rounded
-          opacity-100 sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100
-          transition-opacity duration-200"
-      >
-        <FaChevronRight className="text-xs" />
-      </button>
-
-      {/* Dots */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-2 py-1 bg-white/85 border border-gray-800 rounded-full">
-        {gallery.images.map((_, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => jumpTo(i)}
-            aria-label={`Go to ${name} screenshot ${i + 1}`}
-            aria-current={i === index}
-            className={`h-1.5 rounded-full transition-all duration-200 ${
-              i === index ? 'w-4 bg-gray-800' : 'w-1.5 bg-gray-400 hover:bg-gray-600'
-            }`}
-          />
-        ))}
-      </div>
+      ) : (
+        <span className={`${dot} bg-red-500`} />
+      )}
+      <span className={`${dot} bg-yellow-500`} />
+      <span className={`${dot} bg-green-500`} />
     </div>
   );
 };
 
-/* ------------------------------------------------------------------ */
-/* Large card: projects with a gallery                                 */
-/* ------------------------------------------------------------------ */
-
-const FeaturedCard = ({ project, index }: { project: Project; index: number }) => (
-  <motion.article
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: index * 0.1, duration: 0.4 }}
-    className="flex flex-col overflow-hidden bg-white border-2 border-gray-800 rounded-lg
-      shadow-[3px_3px_0px_0px_rgba(31,41,55)] sm:shadow-[5px_5px_0px_0px_rgba(31,41,55)]
-      hover:shadow-[5px_5px_0px_0px_rgba(31,41,55)] sm:hover:shadow-[8px_8px_0px_0px_rgba(31,41,55)]
-      transition-shadow duration-200"
-  >
-    <div className="relative">
-      {project.gallery && <Carousel gallery={project.gallery} name={project.name} />}
-      <span className="absolute top-2 right-2 z-10 px-2 py-0.5 text-[10px] font-mono font-bold uppercase tracking-wider bg-gray-800 text-white border border-white/25 rounded">
+const WindowChrome = ({
+  project,
+  onClose,
+}: {
+  project: Project;
+  onClose?: () => void;
+}) => (
+  <>
+    {/* Title bar */}
+    <div className="flex items-center gap-2.5 h-8 sm:h-9 px-3 bg-gray-200 border-b-2 border-gray-800">
+      <TrafficLights onClose={onClose} />
+      <span className="truncate font-mono text-[11px] font-bold text-gray-700">
+        {project.name}
+      </span>
+      <span className="ml-auto shrink-0 px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-widest text-gray-600 bg-gray-100 border border-gray-400 rounded">
         {project.category}
       </span>
     </div>
 
-    <div className="flex flex-col flex-1 p-4">
-      <h3 className="text-lg font-bold text-gray-900 leading-tight">{project.name}</h3>
-
-      <p className="mt-1 text-sm font-medium text-gray-800 leading-snug">{project.tagline}</p>
-
-      <p className="mt-2 text-sm text-gray-600 leading-relaxed">{project.description}</p>
-
-      <div className="mt-3 flex flex-wrap gap-1.5">
-        {project.stack.map((tech) => (
-          <span
-            key={tech}
-            className="px-2 py-0.5 text-[11px] font-mono text-gray-700 bg-gray-100 border border-gray-300 rounded"
-          >
-            {tech}
-          </span>
-        ))}
+    {/* Address bar */}
+    <div className="flex items-center gap-2 h-8 sm:h-9 px-3 bg-gray-300 border-b-2 border-gray-800">
+      <IoLockClosed className="shrink-0 text-[10px] text-gray-600" aria-hidden />
+      <div className="flex-1 min-w-0 px-2 py-0.5 font-mono text-[10px] sm:text-[11px] text-gray-700 truncate bg-gray-100 border border-gray-800 rounded-sm">
+        {displayUrl(project)}
       </div>
-
-      <div className="mt-auto pt-4 flex flex-wrap items-center gap-2">
-        {project.demo && (
-          <a
-            href={project.demo}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-white bg-gray-800 border-2 border-gray-800 rounded hover:bg-gray-700 transition-colors"
-          >
-            <FaExternalLinkAlt className="text-xs" />
-            Live Demo
-          </a>
-        )}
+      {project.demo && (
         <a
-          href={project.repo}
+          href={project.demo}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-gray-800 bg-white border-2 border-gray-800 rounded hover:bg-gray-100 transition-colors"
+          aria-label={`Open ${project.name} in a new tab`}
+          className="shrink-0 px-1.5 py-1 text-[10px] text-gray-700 bg-gray-200 border border-gray-800 rounded-sm hover:bg-white transition-colors duration-200"
         >
-          <FaGithub className="text-sm" />
-          Code
+          <FaExternalLinkAlt />
         </a>
-      </div>
+      )}
     </div>
+  </>
+);
+
+/* ------------------------------------------------------------------ */
+/* Featured card: a browser window showing a single still              */
+/* ------------------------------------------------------------------ */
+
+const FeaturedCard = ({
+  project,
+  index,
+  onExpand,
+}: {
+  project: Project;
+  index: number;
+  onExpand: (project: Project) => void;
+}) => (
+  <motion.article
+    initial={{ opacity: 0, y: 24 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay: index * 0.12, duration: 0.55, ease: EASE }}
+    className="group flex flex-col overflow-hidden bg-white border-2 border-gray-800 rounded-lg
+      shadow-[3px_3px_0px_0px_rgba(31,41,55)] sm:shadow-[5px_5px_0px_0px_rgba(31,41,55)]
+      hover:shadow-[5px_5px_0px_0px_rgba(31,41,55)] sm:hover:shadow-[10px_10px_0px_0px_rgba(31,41,55)]
+      hover:-translate-y-0.5 transition-[box-shadow,transform] duration-300 ease-out"
+  >
+    <WindowChrome project={project} />
+
+    {/* The still is the whole affordance: one click opens the gallery. */}
+    <button
+      type="button"
+      onClick={() => onExpand(project)}
+      aria-label={`Open the ${project.name} gallery`}
+      className={`relative w-full aspect-[16/10] overflow-hidden cursor-zoom-in
+        focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-800 focus-visible:ring-inset
+        ${project.gallery?.bg ?? 'bg-gray-100'}`}
+    >
+      {project.gallery && (
+        <img
+          src={project.gallery.images[0]}
+          alt={`${project.name} preview`}
+          loading="lazy"
+          decoding="async"
+          className={`absolute inset-0 w-full h-full transition-transform duration-500
+            ease-out group-hover:scale-[1.03] ${
+              project.gallery.posterFit === 'contain'
+                ? 'object-contain p-4'
+                : 'object-cover object-top'
+            }`}
+        />
+      )}
+
+      {/* Hover reveal on pointer devices; always visible on touch, where the
+          hover state would never fire. */}
+      <span
+        className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5
+          px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider
+          text-white bg-gray-900/85 border border-white/25 rounded
+          opacity-100 translate-y-0
+          sm:opacity-0 sm:translate-y-1
+          sm:group-hover:opacity-100 sm:group-hover:translate-y-0
+          transition-all duration-300 ease-out"
+      >
+        <IoExpand />
+        View gallery
+      </span>
+    </button>
   </motion.article>
 );
+
+/* ------------------------------------------------------------------ */
+/* Lightbox: carousel on the left, floating description on the right   */
+/* ------------------------------------------------------------------ */
+
+const Lightbox = ({
+  project,
+  gallery,
+  onDismissed,
+}: {
+  project: Project;
+  gallery: Gallery;
+  onDismissed: () => void;
+}) => {
+  const total = gallery.images.length;
+  const { index, direction, setPaused, go, jumpTo, reduceMotion } = useSlides(total);
+
+  // Closing is a two-step: play the exit, then tell the parent to unmount us.
+  // The unmount is driven by a plain timer rather than an animation-completion
+  // callback, so it cannot be left hanging: an overlay stuck at opacity 0 still
+  // covers the viewport and would swallow every click on the page. The exit
+  // transition below is a tween shorter than CLOSE_MS, so it always finishes
+  // before the node goes.
+  const [closing, setClosing] = useState(false);
+  const requestClose = useCallback(() => setClosing(true), []);
+
+  useEffect(() => {
+    if (!closing) return;
+    const id = setTimeout(onDismissed, CLOSE_MS);
+    return () => clearTimeout(id);
+  }, [closing, onDismissed]);
+
+  // Escape closes, arrows navigate.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') requestClose();
+      if (e.key === 'ArrowRight') go(1);
+      if (e.key === 'ArrowLeft') go(-1);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [go, requestClose]);
+
+  // Freeze the page behind the overlay.
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
+
+  // The panel inherits `hidden`/`visible` from the overlay: one flag drives
+  // the backdrop fade and the zoom together.
+  const panelVariants = reduceMotion
+    ? { hidden: { opacity: 0 }, visible: { opacity: 1 } }
+    : {
+        hidden: { opacity: 0, scale: 0.94, y: 14 },
+        visible: { opacity: 1, scale: 1, y: 0 },
+      };
+
+  // Springy on the way in, a quick tween on the way out: a spring would still
+  // be settling when CLOSE_MS unmounts the overlay, which reads as a cut.
+  const panelTransition =
+    closing || reduceMotion
+      ? { duration: 0.2, ease: EASE }
+      : { type: 'spring' as const, stiffness: 260, damping: 26, mass: 0.9 };
+
+  const arrow =
+    'absolute top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center ' +
+    'bg-white/90 hover:bg-white text-gray-800 border-2 border-gray-800 rounded ' +
+    'transition-transform duration-200 hover:scale-105 active:scale-95';
+
+  return (
+    <motion.div
+      className={`fixed inset-0 z-[100] flex items-center justify-center p-2 sm:p-4 bg-gray-900/60 backdrop-blur-md ${
+        closing ? 'pointer-events-none' : ''
+      }`}
+      variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+      initial="hidden"
+      animate={closing ? 'hidden' : 'visible'}
+      transition={{ duration: closing ? 0.2 : 0.25, ease: EASE }}
+      onClick={requestClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${project.name} gallery`}
+    >
+      <motion.div
+        variants={panelVariants}
+        transition={panelTransition}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-[96vw] max-h-full overflow-hidden bg-gray-100 border-2 sm:border-[3px] border-gray-800 rounded-lg sm:rounded-xl shadow-[6px_6px_0px_0px_rgba(31,41,55)] sm:shadow-[10px_10px_0px_0px_rgba(31,41,55)]"
+      >
+        <WindowChrome project={project} onClose={requestClose} />
+
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_clamp(300px,27vw,400px)]">
+          {/* Carousel */}
+          <div
+            className={`relative h-[42vh] sm:h-[50vh] lg:h-[72vh] ${gallery.bg}`}
+            onMouseEnter={() => setPaused(true)}
+            onMouseLeave={() => setPaused(false)}
+            onFocusCapture={() => setPaused(true)}
+            onBlurCapture={() => setPaused(false)}
+          >
+            {/* Default `sync` mode: the slides are absolutely positioned and
+                stacked, so the outgoing and incoming frames cross-fade in place. */}
+            <AnimatePresence initial={false} custom={direction}>
+              <motion.img
+                key={index}
+                src={gallery.images[index]}
+                alt={`${project.name}, view ${index + 1} of ${total}`}
+                decoding="async"
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.4, ease: EASE }}
+                className="absolute inset-0 w-full h-full object-contain"
+              />
+            </AnimatePresence>
+
+            <button
+              type="button"
+              onClick={() => go(-1)}
+              aria-label="Previous screenshot"
+              className={`${arrow} left-2 sm:left-3`}
+            >
+              <FaChevronLeft className="text-sm" />
+            </button>
+            <button
+              type="button"
+              onClick={() => go(1)}
+              aria-label="Next screenshot"
+              className={`${arrow} right-2 sm:right-3`}
+            >
+              <FaChevronRight className="text-sm" />
+            </button>
+          </div>
+
+          {/* Floating description */}
+          <div className="relative lg:h-[72vh] bg-gray-100 border-t-2 lg:border-t-0 lg:border-l-2 border-gray-800 overflow-y-auto no-scrollbar">
+            <div className="flex min-h-full items-center p-4 sm:p-5">
+              <motion.div
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: 18 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.12, duration: 0.45, ease: EASE }}
+                className="flex w-full flex-col p-4 bg-white border-2 border-gray-800 rounded-lg shadow-[4px_4px_0px_0px_rgba(31,41,55)]"
+              >
+                <h3 className="text-xl font-bold text-gray-900 leading-tight">
+                  {project.name}
+                </h3>
+
+                <p className="mt-1.5 text-sm font-medium text-gray-800 leading-snug">
+                  {project.tagline}
+                </p>
+
+                <p className="mt-3 text-sm text-gray-600 leading-relaxed">
+                  {project.description}
+                </p>
+
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {project.stack.map((tech) => (
+                    <span
+                      key={tech}
+                      className="px-2 py-0.5 text-[11px] font-mono text-gray-700 bg-gray-100 border border-gray-300 rounded"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-5 flex flex-wrap items-center gap-2">
+                  {project.demo && (
+                    <a
+                      href={project.demo}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-white bg-gray-800 border-2 border-gray-800 rounded hover:bg-gray-700 transition-colors"
+                    >
+                      <FaExternalLinkAlt className="text-xs" />
+                      Live Demo
+                    </a>
+                  )}
+                  {project.download && (
+                    <a
+                      href={project.download}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-white bg-gray-800 border-2 border-gray-800 rounded hover:bg-gray-700 transition-colors"
+                    >
+                      <FaDownload className="text-xs" />
+                      Download
+                    </a>
+                  )}
+                  <a
+                    href={project.repo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-bold text-gray-800 bg-white border-2 border-gray-800 rounded hover:bg-gray-100 transition-colors"
+                  >
+                    <FaGithub className="text-sm" />
+                    Code
+                  </a>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+
+        {/* Thumbnail strip doubles as the status bar */}
+        <div className="flex items-center gap-3 px-3 py-2 bg-gray-200 border-t-2 border-gray-800">
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+            {gallery.images.map((src, i) => (
+              <button
+                key={src}
+                type="button"
+                onClick={() => jumpTo(i)}
+                aria-label={`Go to screenshot ${i + 1}`}
+                aria-current={i === index}
+                className={`shrink-0 w-14 h-9 sm:w-16 sm:h-10 overflow-hidden border-2 rounded transition-all duration-300 ${
+                  i === index
+                    ? 'border-gray-800 opacity-100 scale-100'
+                    : 'border-gray-400 opacity-55 hover:opacity-100 scale-95 hover:scale-100'
+                } ${gallery.bg}`}
+              >
+                <img
+                  src={src}
+                  alt=""
+                  aria-hidden
+                  loading="lazy"
+                  decoding="async"
+                  className="w-full h-full object-contain"
+                />
+              </button>
+            ))}
+          </div>
+
+          <span className="ml-auto shrink-0 font-mono text-[11px] font-bold text-gray-600">
+            {index + 1} / {total}
+          </span>
+
+          <button
+            type="button"
+            onClick={requestClose}
+            aria-label="Close gallery"
+            className="shrink-0 w-7 h-7 flex items-center justify-center text-gray-800 bg-white border-2 border-gray-800 rounded hover:bg-gray-100 transition-transform duration-200 hover:scale-105 active:scale-95"
+          >
+            <IoClose />
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+};
+
+/**
+ * Rendered into `document.body` so the overlay escapes the `overflow-hidden`
+ * browser window and the scrolling content column above it.
+ */
+const LightboxPortal = ({
+  project,
+  onDismissed,
+}: {
+  project: Project | null;
+  onDismissed: () => void;
+}) =>
+  createPortal(
+    project?.gallery ? (
+      <Lightbox
+        key={project.name}
+        project={project}
+        gallery={project.gallery}
+        onDismissed={onDismissed}
+      />
+    ) : null,
+    document.body,
+  );
 
 /* ------------------------------------------------------------------ */
 /* Compact card: no artwork, the name does the work                    */
@@ -251,6 +556,10 @@ const CompactCard = ({ project, index }: { project: Project; index: number }) =>
 const Projects = () => {
   const featured = projects.filter((p) => p.gallery);
   const compact = projects.filter((p) => !p.gallery);
+  const [lightbox, setLightbox] = useState<Project | null>(null);
+
+  const openLightbox = useCallback((project: Project) => setLightbox(project), []);
+  const closeLightbox = useCallback(() => setLightbox(null), []);
 
   return (
     <div className="px-1 py-4">
@@ -261,9 +570,14 @@ const Projects = () => {
         </p>
       </div>
 
-      <div className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {featured.map((project, i) => (
-          <FeaturedCard key={project.name} project={project} index={i} />
+          <FeaturedCard
+            key={project.name}
+            project={project}
+            index={i}
+            onExpand={openLightbox}
+          />
         ))}
       </div>
 
@@ -282,6 +596,8 @@ const Projects = () => {
         <FaGithub />
         See all repositories on GitHub →
       </a>
+
+      <LightboxPortal project={lightbox} onDismissed={closeLightbox} />
     </div>
   );
 };
