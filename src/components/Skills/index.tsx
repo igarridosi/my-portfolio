@@ -1,12 +1,17 @@
 import type { ReactNode } from 'react';
 import { motion } from 'framer-motion';
-import { FaReact, FaHtml5, FaGitAlt, FaGithub, FaJava, FaBolt, FaChartLine, FaLayerGroup } from 'react-icons/fa';
+import {
+  FaReact, FaHtml5, FaGitAlt, FaGithub, FaJava, FaBolt, FaChartLine,
+  FaLayerGroup, FaRobot,
+} from 'react-icons/fa';
 import {
   SiTypescript, SiTailwindcss, SiJavascript, SiMysql, SiMariadb, SiDotnet,
   SiKotlin, SiJetpackcompose, SiAndroid, SiNextdotjs, SiSass, SiPython,
-  SiDocker, SiPostgresql, SiGithubactions,
+  SiDocker, SiPostgresql, SiGithubactions, SiNodedotjs,
 } from 'react-icons/si';
-import { MdSync, MdSpeed, MdAutoAwesome } from 'react-icons/md';
+import {
+  MdSync, MdSpeed, MdAutoAwesome, MdDesktopWindows, MdDesignServices,
+} from 'react-icons/md';
 import { PiFileCSharp } from 'react-icons/pi';
 
 interface Skill {
@@ -25,6 +30,7 @@ const skillCategories: { title: string; skills: Skill[] }[] = [
       { name: 'Tailwind CSS', icon: <SiTailwindcss /> },
       { name: 'Sass', icon: <SiSass /> },
       { name: 'HTML5 / CSS3', icon: <FaHtml5 /> },
+      { name: 'WPF', icon: <MdDesktopWindows /> },
     ],
   },
   {
@@ -33,6 +39,7 @@ const skillCategories: { title: string; skills: Skill[] }[] = [
       { name: 'C#', icon: <PiFileCSharp /> },
       { name: '.NET Core', icon: <SiDotnet /> },
       { name: 'Python', icon: <SiPython /> },
+      { name: 'Node.js', icon: <SiNodedotjs /> },
       { name: 'Java', icon: <FaJava /> },
       { name: 'RESTful APIs', icon: <FaLayerGroup /> },
       { name: 'Multithreading', icon: <FaBolt /> },
@@ -58,6 +65,7 @@ const skillCategories: { title: string; skills: Skill[] }[] = [
     title: 'Architecture & Practices',
     skills: [
       { name: 'Asynchronous Systems', icon: <MdSync /> },
+      { name: 'UI/UX Development', icon: <MdDesignServices /> },
       { name: 'UI Performance Profiling', icon: <MdSpeed /> },
       { name: 'Real-time Data Visualization', icon: <FaChartLine /> },
     ],
@@ -70,6 +78,8 @@ const skillCategories: { title: string; skills: Skill[] }[] = [
       { name: 'Docker', icon: <SiDocker /> },
       { name: 'CI/CD', icon: <SiGithubactions /> },
       { name: 'AI-assisted development', icon: <MdAutoAwesome /> },
+      { name: 'GitHub Copilot', icon: <FaGithub /> },
+      { name: 'Claude Code', icon: <FaRobot /> },
     ],
   },
 ];

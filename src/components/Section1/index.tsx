@@ -72,7 +72,7 @@ const Section1 = () => {
         {/* Professional tagline */}
         <div className="mb-6 sm:mb-8 space-y-2">
           <p className="text-sm sm:text-base lg:text-lg text-gray-700 font-medium">
-            High-concurrency desktop apps and data-heavy web platforms.
+            High-concurrency desktop apps and data-heavy web platforms. Fast on both.
           </p>
           <p className="text-xs sm:text-sm font-mono text-gray-400 flex items-center gap-2 flex-wrap">
             <FaMapMarkerAlt className="text-gray-400" />
@@ -122,7 +122,7 @@ const Section1 = () => {
         {/* Social links */}
         <div className="flex items-center gap-4">
           <a
-            href="https://www.linkedin.com/in/ibai-garrido-699826353/"
+            href="https://www.linkedin.com/in/ibai-garrido/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors font-mono"

@@ -4,7 +4,7 @@ import { MdEmail } from 'react-icons/md';
 import { motion } from 'framer-motion';
 
 const socialLinks = [
-  { id: 'linkedin', label: 'Linkedin', icon: <FaLinkedinIn className="text-xl sm:text-3xl" />, url: 'https://www.linkedin.com/in/ibai-garrido-699826353/' },
+  { id: 'linkedin', label: 'Linkedin', icon: <FaLinkedinIn className="text-xl sm:text-3xl" />, url: 'https://www.linkedin.com/in/ibai-garrido/' },
   { id: 'github', label: 'Github', icon: <FaGithub className="text-xl sm:text-3xl" />, url: 'https://github.com/igarridosi' },
 ];
 

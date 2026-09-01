@@ -22,7 +22,7 @@ export const roles: Role[] = [
     company: 'IRISBOND',
     title: 'Software Developer Intern, C# / .NET',
     location: 'San Sebastián, Spain',
-    period: 'Jan 2026 to Apr 2026',
+    period: 'Mar 2026 to Jun 2026',
     highlights: [
       'Engineered "HiruSystray", a multithreaded Windows application in C# for eye-tracking hardware calibration, eliminating UI thread blocking to keep the interface responsive under load.',
       'Implemented gaze-control algorithms (Dwell) with custom cursor-smoothing filters and tolerance zones, making navigation fully accessible without a mouse.',
@@ -34,7 +34,7 @@ export const roles: Role[] = [
     company: 'SMARTENDS',
     title: 'Software Developer Intern, Python / IoT',
     location: 'Ghent, Belgium',
-    period: 'Jan 2025 to Apr 2025',
+    period: 'Mar 2025 to Jun 2025',
     highlights: [
       'Developed IoT backend modules in Python processing high-frequency sensor data for waste management and route optimisation.',
       'Optimised a real-time monitoring platform visualising fill levels, geographic patterns and collection schedules, cutting data processing latency.',

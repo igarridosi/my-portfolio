@@ -1,25 +1,33 @@
 import { motion } from 'framer-motion';
 import { FaReact, FaGithub, FaPython } from 'react-icons/fa';
-import { SiKotlin } from 'react-icons/si';
 import { PiFileCSharp } from 'react-icons/pi';
 import {
   MdOutlineSpeed, MdOutlineLayers, MdOutlinePublic, MdOutlineAutoAwesome,
   MdOutlineLocationOn, MdOutlineSchool, MdOutlineWorkOutline, MdOutlineFlag,
+  MdOutlineTrackChanges,
 } from 'react-icons/md';
 
 const stack = [
-  { icon: <PiFileCSharp className="text-xl" />, label: 'C# / .NET', sub: 'Desktop & backend' },
+  { icon: <PiFileCSharp className="text-xl" />, label: 'C# / .NET', sub: 'WPF desktop & backend' },
   { icon: <FaReact className="text-xl" />, label: 'React / TS', sub: 'Web' },
   { icon: <FaPython className="text-xl" />, label: 'Python', sub: 'Data & IoT' },
-  { icon: <SiKotlin className="text-xl" />, label: 'Kotlin', sub: 'Mobile' },
 ];
 
 /* The quick facts a recruiter scans for before reading a single sentence. */
 const facts = [
   { icon: <MdOutlineLocationOn />, label: 'Based in', value: 'Prague, Czech Republic' },
   { icon: <MdOutlineWorkOutline />, label: 'Open to', value: 'On-site, hybrid or remote in Europe' },
-  { icon: <MdOutlineSchool />, label: 'Qualified', value: 'Two EQF Level 5 diplomas' },
-  { icon: <MdOutlineFlag />, label: 'Experience', value: 'Internships in Spain and Belgium' },
+  {
+    icon: <MdOutlineSchool />,
+    label: 'Qualified',
+    value: 'Two EQF Level 5 diplomas',
+    note: 'Two-year post-secondary higher qualification',
+  },
+  {
+    icon: <MdOutlineFlag />,
+    label: 'Experience',
+    value: 'Production work at Irisbond (ES) and SmartEnds (BE)',
+  },
 ];
 
 const values = [
@@ -41,7 +49,7 @@ const values = [
   {
     icon: <MdOutlineAutoAwesome className="text-2xl" />,
     title: 'I ship fast without shipping mess',
-    text: "I lean on AI tooling to move quickly, then review everything that lands. Git, code review and iterative delivery are habits, not requirements someone imposed on me. I would rather ask why a feature exists than build the wrong thing well.",
+    text: "I use AI coding agents daily to move quickly, then review everything that lands. Git, code review and iterative delivery are habits, not requirements someone imposed on me. I would rather ask why a feature exists than build the wrong thing well.",
   },
 ];
 
@@ -62,20 +70,43 @@ const AboutMe = () => {
       <motion.div {...fadeUp(0.1)} className="space-y-3">
         <h2 className="text-2xl sm:text-3xl font-bold">About Me</h2>
         <p className="text-lg sm:text-xl leading-relaxed border-l-4 border-gray-800 pl-4 text-gray-800 font-medium">
-          Most developers specialize in one platform.<br />
-          <span className="font-bold">I build across four.</span>
+          Most developers pick one side of the stack.<br />
+          <span className="font-bold">I work at both ends.</span>
         </p>
         <p className="text-gray-600 leading-relaxed">
-          I'm a Full Stack Developer based in Prague, working on high-concurrency desktop
-          applications and data-heavy web platforms. Two internships, one in Spain and one in
-          Belgium, taught me to ship production software inside international teams and that
-          most performance problems are design problems wearing a disguise.
+          I'm a Full Stack Developer based in Prague who works at both ends of the stack:
+          multithreaded C# and WPF desktop software that talks directly to hardware, and
+          React/TypeScript interfaces that stay fast under heavy data loads. Two internships,
+          one in Spain and one in Belgium, plus{' '}
+          <a
+            href="https://www.huntrvalue.me/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold text-gray-800 underline decoration-gray-400 underline-offset-2 hover:decoration-gray-800 transition-colors"
+          >
+            Huntr
+          </a>
+          , a financial analytics platform of my own running in production. Along the way I learned that most performance problems are
+          design problems wearing a disguise.
         </p>
+      </motion.div>
+
+      {/* What I am looking for: stated, not asked for */}
+      <motion.div {...fadeUp(0.13)}>
+        <div className="flex items-start gap-2.5 p-3.5 border-2 border-gray-800 bg-gray-50">
+          <MdOutlineTrackChanges className="mt-0.5 text-lg text-gray-700 shrink-0" />
+          <p className="text-sm text-gray-700 leading-relaxed">
+            <span className="font-bold text-gray-900">
+              I'm looking for my first permanent developer role.
+            </span>{' '}
+            Available immediately.
+          </p>
+        </div>
       </motion.div>
 
       {/* Quick facts */}
       <motion.div {...fadeUp(0.15)} className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {facts.map(({ icon, label, value }) => (
+        {facts.map(({ icon, label, value, note }) => (
           <div
             key={label}
             className="flex items-center gap-2.5 px-3 py-2 border-2 border-gray-200 rounded-lg bg-gray-50"
@@ -84,6 +115,7 @@ const AboutMe = () => {
             <div className="min-w-0">
               <p className="text-[10px] uppercase tracking-widest font-mono text-gray-400">{label}</p>
               <p className="text-sm font-semibold text-gray-800 leading-snug">{value}</p>
+              {note && <p className="text-[11px] text-gray-500 leading-snug">({note})</p>}
             </div>
           </div>
         ))}
@@ -91,7 +123,7 @@ const AboutMe = () => {
 
       <motion.div {...fadeUp(0.2)} className="space-y-2">
         <p className="text-xs uppercase tracking-widest text-gray-400 font-mono">What I build with</p>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           {stack.map(({ icon, label, sub }) => (
             <div key={label}
               className="flex flex-col items-center gap-1 sm:gap-1.5 p-2 sm:p-3 border-2 border-gray-800 bg-white shadow-[3px_3px_0px_0px_rgba(31,41,55)] text-center"

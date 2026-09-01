@@ -14,7 +14,7 @@ const DIRECT_LINKS = [
   {
     icon: <FaLinkedinIn className="text-lg" />,
     label: 'LinkedIn',
-    href: 'https://www.linkedin.com/in/ibai-garrido-699826353/',
+    href: 'https://www.linkedin.com/in/ibai-garrido/',
     external: true,
   },
   {
