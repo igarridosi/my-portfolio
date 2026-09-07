@@ -20,7 +20,10 @@ export interface Project {
   name: string;
   /** One line: the problem this solves. This is what a recruiter reads first. */
   tagline: string;
-  /** 2-3 short lines: what I built and the decisions behind it */
+  /**
+   * Problem, solution, outcome, in that order. The outcome is what the work
+   * actually changed — never an invented metric.
+   */
   description: string;
   /** Technologies, most relevant first */
   stack: string[];
@@ -42,11 +45,11 @@ export const projects: Project[] = [
     name: 'Huntr',
     tagline: 'Professional-grade fundamental stock analysis, without the $24k/year terminal.',
     description:
-      'A financial terminal that makes institutional-style analysis accessible. Built a DCF calculator driven by live sliders, backed by Monte Carlo simulations that run thousands of scenarios so a valuation comes with a probability range instead of a single guess. Also an Opportunity Radar that surfaces unusual volume and buyback activity, and a visual earnings calendar. The heavy modelling runs in Python and PostgreSQL so the React client stays fast under load.',
+      'Serious fundamental analysis sits behind terminals that cost $24k a year, so most retail investors value a company on gut feel. I built a DCF calculator driven by live sliders, backed by Monte Carlo simulations across thousands of scenarios, plus an Opportunity Radar for unusual volume and buyback activity and a visual earnings calendar. The heavy modelling runs in Python and PostgreSQL so the React client stays fast under load. The result: a valuation arrives as a probability range instead of one number, and it runs in production today.',
     stack: ['TypeScript', 'React', 'Python', 'PostgreSQL'],
     category: 'Web',
     repo: 'https://github.com/igarridosi/Huntr',
-    demo: 'https://huntrvalue.me/',
+    demo: 'https://www.huntrvalue.me/',
     gallery: {
       images: [
         '/img/projects/landing_page.webp',
@@ -66,7 +69,7 @@ export const projects: Project[] = [
     name: 'Oroi',
     tagline: 'A subscription tracker that makes you type every expense, on purpose.',
     description:
-      'Native Android app built with Kotlin and Jetpack Compose. The product decision that defines it: no bank sync. Manual entry is deliberate friction, because the goal is awareness rather than automation. Named after the Basque word "oroitu", meaning to remember.',
+      'Subscription trackers automate everything, and the moment you stop typing your expenses you stop noticing them. So this native Android app, built in Kotlin and Jetpack Compose, deliberately has no bank sync: entering each expense by hand is the friction that makes it register. The outcome is awareness rather than automation, and it ships publicly on Appteka. Named after the Basque word "oroitu", to remember.',
     stack: ['Kotlin', 'Jetpack Compose', 'Android SDK'],
     category: 'Mobile',
     repo: 'https://github.com/igarridosi/OroiApp',
@@ -87,7 +90,7 @@ export const projects: Project[] = [
     name: 'Waveter',
     tagline: 'Tune into any radio station on earth from one page.',
     description:
-      'React app for discovering and streaming radio stations worldwide, built around a public radio API with browser audio streaming.',
+      'Finding a station abroad means hopping between broadcaster sites that each play differently. This React client sits on a public radio directory and streams straight in the browser, so any station on earth is two clicks away from one page.',
     stack: ['React', 'JavaScript', 'REST API'],
     category: 'Web',
     repo: 'https://github.com/igarridosi/Waveter_RadioExplorer',
@@ -97,7 +100,7 @@ export const projects: Project[] = [
     name: 'Open Workout Spots',
     tagline: 'A community map of outdoor calisthenics spots.',
     description:
-      'Full stack platform to discover, share and review outdoor training locations. MariaDB schema, Express REST API and React client, all mine.',
+      'Outdoor calisthenics spots are passed around by word of mouth and forgotten. I built the whole platform to make them findable: MariaDB schema, Express REST API and React client, all mine. It leaves a community map anyone can add to and review.',
     stack: ['React', 'Node.js', 'Express', 'MariaDB'],
     category: 'Backend',
     repo: 'https://github.com/igarridosi/OWS',
@@ -107,7 +110,7 @@ export const projects: Project[] = [
     name: 'The Mole Game',
     tagline: 'Real-time multiplayer social deduction.',
     description:
-      'A desktop game in C# where several clients share one authoritative game state, kept in sync in real time as players join, act and drop mid-round.',
+      'Social deduction falls apart if two players see different states. This C# desktop game keeps one authoritative game state that every client mirrors, so the round stays consistent even as players join, act and drop mid-game.',
     stack: ['C#', '.NET', 'Real-time networking'],
     category: 'Desktop',
     repo: 'https://github.com/igarridosi/TheMoleGame',

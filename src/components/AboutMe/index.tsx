@@ -68,7 +68,7 @@ const AboutMe = () => {
       className="px-1 py-4 space-y-8"
     >
       <motion.div {...fadeUp(0.1)} className="space-y-3">
-        <h2 className="text-2xl sm:text-3xl font-bold">About Me</h2>
+        <h1 className="text-2xl sm:text-3xl font-bold">About Me</h1>
         <p className="text-lg sm:text-xl leading-relaxed border-l-4 border-gray-800 pl-4 text-gray-800 font-medium">
           Most developers pick one side of the stack.<br />
           <span className="font-bold">I work at both ends.</span>

@@ -68,7 +68,7 @@ const Contact = () => {
     >
       {/* Header */}
       <div className="text-center space-y-2">
-        <motion.h2
+        <motion.h1
           className="text-2xl sm:text-3xl font-bold flex items-center justify-center gap-2"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -76,7 +76,7 @@ const Contact = () => {
         >
           <MdMessage className="text-3xl text-gray-700" />
           Let's Connect
-        </motion.h2>
+        </motion.h1>
         <p className="text-gray-500 text-sm">
           Looking for a developer? I'd love to hear about the role.
         </p>

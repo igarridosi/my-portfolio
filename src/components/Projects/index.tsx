@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
@@ -224,6 +224,37 @@ const Lightbox = ({
   // before the node goes.
   const [closing, setClosing] = useState(false);
   const requestClose = useCallback(() => setClosing(true), []);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // A modal owns the focus while it is open: move focus in, and hand it back to
+  // whatever opened the gallery once it closes.
+  useEffect(() => {
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    panelRef.current?.focus();
+    return () => previouslyFocused?.focus?.();
+  }, []);
+
+  // Keep Tab inside the dialog rather than letting it wander the page behind.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab' || !panelRef.current) return;
+      const items = panelRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled])',
+      );
+      if (!items.length) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   useEffect(() => {
     if (!closing) return;
@@ -287,6 +318,8 @@ const Lightbox = ({
       aria-label={`${project.name} gallery`}
     >
       <motion.div
+        ref={panelRef}
+        tabIndex={-1}
         variants={panelVariants}
         transition={panelTransition}
         onClick={(e) => e.stopPropagation()}
@@ -348,9 +381,9 @@ const Lightbox = ({
               transition={{ delay: 0.12, duration: 0.45, ease: EASE }}
                 className="flex w-full flex-col p-4 bg-white border-2 border-gray-800 rounded-lg shadow-[4px_4px_0px_0px_rgba(31,41,55)]"
               >
-                <h3 className="text-xl font-bold text-gray-900 leading-tight">
+                <h2 className="text-xl font-bold text-gray-900 leading-tight">
                   {project.name}
-                </h3>
+                </h2>
 
                 <p className="mt-1.5 text-sm font-medium text-gray-800 leading-snug">
                   {project.tagline}
@@ -508,9 +541,9 @@ const CompactCard = ({ project, index }: { project: Project; index: number }) =>
         {project.category}
       </span>
 
-      <h3 className="mt-1.5 font-mono text-base font-bold text-white leading-tight">
+      <h2 className="mt-1.5 font-mono text-base font-bold text-white leading-tight">
         {project.name}
-      </h3>
+      </h2>
 
       <p className="mt-1.5 text-xs text-gray-400 leading-relaxed">{project.tagline}</p>
 
@@ -564,7 +597,7 @@ const Projects = () => {
   return (
     <div className="px-1 py-4">
       <div className="mb-5 space-y-1">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Selected Work</h2>
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Selected Work</h1>
         <p className="text-sm text-gray-500">
           Five products across web, backend, mobile and desktop, each built end to end.
         </p>

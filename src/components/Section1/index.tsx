@@ -5,6 +5,26 @@ import { useState, useEffect } from 'react';
 
 const ROLES = ['Developer', 'Engineer', 'Builder'];
 
+/**
+ * Splits a label into per-character spans so CSS can stagger them off
+ * `--char-index`. Hidden from assistive tech: a screen reader handed one span
+ * per letter reads the word out letter by letter, so the button carries a
+ * plain `aria-label` instead.
+ */
+const SplitText = ({ text }: { text: string }) => (
+  <span aria-hidden="true">
+    {[...text].map((char, i) => (
+      <span
+        key={`${char}-${i}`}
+        className={`split-char${char === ' ' ? ' split-char--space' : ''}`}
+        style={{ '--char-index': i } as React.CSSProperties}
+      >
+        {char === ' ' ? ' ' : char}
+      </span>
+    ))}
+  </span>
+);
+
 const useTypewriter = () => {
   const [text, setText] = useState('');
   const [roleIdx, setRoleIdx] = useState(0);
@@ -49,28 +69,35 @@ const Section1 = () => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <main className="space-y-0">
+      <div className="hero-title space-y-0">
         {/* Name tag */}
         <p className="text-xs sm:text-sm uppercase tracking-[0.25em] font-mono text-gray-400 mb-5">
           Hey, I am Ibai Garrido
         </p>
 
         {/* Main heading */}
-        <div className="leading-none mb-4 sm:mb-5">
-          <h1 className="text-4xl sm:text-6xl lg:text-9xl font-thin flex items-center gap-2 sm:gap-3 text-gray-900">
-            <FaCode className="text-gray-800" />
-            Fullstack
-          </h1>
-          <h1 className="text-3xl sm:text-5xl lg:text-8xl font-bold font-serif text-gray-900">
-            Application
-          </h1>
-          <h1 className="text-2xl sm:text-4xl lg:text-6xl font-mono text-gray-900 mt-3 sm:mt-5">
-            {typedText}<span className="cursor-blink">|</span>
+        <div className="hero-gap-sm">
+          {/* One heading, three lines: screen readers announce
+              "Fullstack Application Developer", not three separate titles. */}
+          <h1>
+            <span className="hero-line-1 font-thin flex items-center gap-2 sm:gap-3 text-gray-900">
+              <FaCode className="text-gray-800" aria-hidden="true" />
+              Fullstack
+            </span>
+            <span className="hero-line-2 block font-bold font-serif text-gray-900">
+              Application
+            </span>
+            <span className="hero-line-3 block font-mono text-gray-900">
+              <span className="sr-only">Developer</span>
+              <span aria-hidden="true">
+                {typedText}<span className="cursor-blink">|</span>
+              </span>
+            </span>
           </h1>
         </div>
 
         {/* Professional tagline */}
-        <div className="mb-6 sm:mb-8 space-y-2">
+        <div className="hero-gap-md space-y-2">
           <p className="text-sm sm:text-base lg:text-lg text-gray-700 font-medium">
             High-concurrency desktop apps and data-heavy web platforms. Fast on both.
           </p>
@@ -86,10 +113,11 @@ const Section1 = () => {
         </div>
 
         {/* CTA buttons */}
-        <div className="flex flex-wrap gap-3 mb-4 sm:mb-6">
+        <div className="hero-gap-sm flex flex-wrap gap-3">
           <motion.button
             onClick={() => navigate('/contact')}
-            className="px-5 py-2.5 sm:px-7 sm:py-3.5 bg-transparent rounded-lg border-2 border-gray-800
+            aria-label="Get in Touch"
+            className="btn-split px-5 py-2.5 sm:px-7 sm:py-3.5 bg-transparent rounded-lg border-2 border-gray-800
                     shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]
                     hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px]
                     transition-all duration-300"
@@ -97,15 +125,16 @@ const Section1 = () => {
             whileTap={{ scale: 0.98 }}
           >
             <span className="inline-flex items-center gap-2 text-sm sm:text-base font-bold text-gray-800">
-              Get in Touch
-              <FaEnvelope />
+              <SplitText text="Get in Touch" />
+              <FaEnvelope aria-hidden="true" />
             </span>
           </motion.button>
 
           <motion.a
             href="/cv/Ibai_Garrido_CV.pdf"
             download="Ibai_Garrido_CV.pdf"
-            className="px-5 py-2.5 sm:px-7 sm:py-3.5 bg-transparent rounded-lg border-2 border-gray-800
+            aria-label="Download CV"
+            className="btn-split px-5 py-2.5 sm:px-7 sm:py-3.5 bg-transparent rounded-lg border-2 border-gray-800
                     shadow-[4px_4px_0px_0px_rgba(0,0,0,0.8)]
                     hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px]
                     transition-all duration-300 inline-flex items-center gap-2"
@@ -113,8 +142,8 @@ const Section1 = () => {
             whileTap={{ scale: 0.98 }}
           >
             <span className="inline-flex items-center gap-2 text-sm sm:text-base font-bold text-gray-800">
-              Download CV
-              <FaDownload />
+              <SplitText text="Download CV" />
+              <FaDownload aria-hidden="true" />
             </span>
           </motion.a>
         </div>
@@ -141,7 +170,7 @@ const Section1 = () => {
             GitHub
           </a>
         </div>
-      </main>
+      </div>
     </motion.div>
   );
 };

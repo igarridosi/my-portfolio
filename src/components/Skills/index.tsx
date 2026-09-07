@@ -93,14 +93,14 @@ function Skills() {
       className="w-full px-1 py-4"
     >
       <div className="mb-5 space-y-1">
-        <motion.h2
+        <motion.h1
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.15 }}
           className="text-2xl sm:text-3xl font-bold text-gray-900"
         >
           Technical Skills
-        </motion.h2>
+        </motion.h1>
         <p className="text-sm text-gray-500">
           What I reach for, grouped by where it lives in the stack.
         </p>
@@ -115,9 +115,9 @@ function Skills() {
             transition={{ delay: categoryIndex * 0.07 }}
             className="p-4 border-2 border-gray-200 rounded-lg bg-white"
           >
-            <h3 className="text-xs uppercase tracking-widest font-mono text-gray-400 mb-2.5">
+            <h2 className="text-xs uppercase tracking-widest font-mono text-gray-400 mb-2.5">
               {category.title}
-            </h3>
+            </h2>
             <div className="flex flex-wrap gap-2">
               {category.skills.map((skill) => (
                 <span

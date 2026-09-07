@@ -16,7 +16,7 @@ const Experience = () => (
     className="px-1 py-4 space-y-8"
   >
     <div className="space-y-1">
-      <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Experience</h2>
+      <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Experience</h1>
       <p className="text-sm text-gray-500">
         Two internships across two countries, shipping production software rather than coursework.
       </p>
@@ -48,7 +48,7 @@ const Experience = () => (
             />
 
             <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-              <h3 className="text-base font-bold text-gray-900">{role.company}</h3>
+              <h2 className="text-base font-bold text-gray-900">{role.company}</h2>
               <span className="text-xs font-mono text-gray-500 whitespace-nowrap">{role.period}</span>
             </div>
 
@@ -103,7 +103,7 @@ const Experience = () => (
               </span>
               <span className="text-xs font-mono text-gray-500">{item.period}</span>
             </div>
-            <h3 className="mt-2 text-sm font-bold text-gray-900 leading-snug">{item.title}</h3>
+            <h2 className="mt-2 text-sm font-bold text-gray-900 leading-snug">{item.title}</h2>
             <p className="mt-1 text-xs text-gray-600">{item.school}</p>
             <p className="text-xs text-gray-500">{item.location}</p>
           </motion.div>

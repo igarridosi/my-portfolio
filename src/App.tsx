@@ -1,8 +1,8 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { IoCaretBack, IoCaretForward, IoRefresh, IoSearch } from 'react-icons/io5';
 
-import Header from './components/Header/index';
 import Section1 from './components/Section1/index';
 import CVSection from './components/CVSection/CVSection';
 import AboutMe from './components/AboutMe';
@@ -11,31 +11,77 @@ import Projects from './components/Projects';
 import Skills from './components/Skills';
 import MenuNav from './components/Navigation/MenuNav';
 import Contact from './components/Contact';
-import Footer from './components/Footer/Footer';
 
 function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  // The tube's colour follows the pointer. Writing CSS variables straight to
+  // the node (rather than through state) keeps this off React's render path:
+  // a mousemove must never re-render the app. Coalesced into one rAF so we
+  // touch the DOM at most once per frame.
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    let frame = 0;
+    let x = 0;
+    let y = 0;
+    const el = document.documentElement;
+
+    const paint = () => {
+      frame = 0;
+      const px = (x / window.innerWidth) * 100;
+      const py = (y / window.innerHeight) * 100;
+      el.style.setProperty('--mx', `${px.toFixed(2)}%`);
+      el.style.setProperty('--my', `${py.toFixed(2)}%`);
+      // Sweep a calm arc of the colour wheel across the screen: deep blue on
+      // the left through to violet on the right, never a full rainbow.
+      el.style.setProperty('--hue', (196 + (px / 100) * 92).toFixed(1));
+    };
+
+    const onMove = (e: PointerEvent) => {
+      x = e.clientX;
+      y = e.clientY;
+      if (!frame) frame = requestAnimationFrame(paint);
+    };
+
+    window.addEventListener('pointermove', onMove, { passive: true });
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, []);
   const displayUrl = `https://www.your-next-developer.dev${location.pathname}`;
   const isHome = location.pathname === '/';
 
   return (
     <motion.div
-      className="min-h-screen bg-background"
+      className="relative min-h-screen flex flex-col"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <Header />
+      {/* Decorative only: never announced, never clickable. */}
+      <div className="crt-bg" aria-hidden="true" />
+      <div className="crt-overlay" aria-hidden="true" />
+      <div className="crt-sweep" aria-hidden="true" />
+
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:z-[200] focus:top-2 focus:left-2
+          focus:px-4 focus:py-2 focus:bg-white focus:text-gray-900 focus:font-bold
+          focus:border-2 focus:border-gray-800 focus:rounded"
+      >
+        Skip to content
+      </a>
 
       <motion.div
-        className="flex flex-row justify-center items-start mt-1 p-2 sm:p-3 lg:px-12 lg:py-4"
+        className="relative z-10 flex flex-1 flex-row justify-center p-2 sm:p-3 lg:px-12 lg:py-4"
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.5 }}
       >
         {/* Retro browser window */}
-        <div className="relative w-full sm:w-[90%] lg:w-[80%] max-w-[1700px] overflow-hidden border-2 sm:border-3 border-gray-800 bg-gray-100 rounded-lg sm:rounded-xl shadow-[3px_3px_0px_0px_rgba(31,41,55)] sm:shadow-[10px_10px_0px_0px_rgba(31,41,55)]">
+        <div className="crt-screen relative my-auto w-full sm:w-[90%] lg:w-[80%] max-w-[1700px] overflow-hidden border-2 sm:border-3 border-gray-800 bg-gray-100 rounded-lg sm:rounded-xl">
 
           {/* Traffic lights bar */}
           <div className="flex items-center h-8 sm:h-10 bg-gray-200 border-b-2 border-gray-800 px-3 sm:px-4">
@@ -48,22 +94,24 @@ function AppLayout() {
 
           {/* Address bar */}
           <div className="hidden md:flex items-center h-10 bg-gray-300 border-b-2 border-gray-800 px-4">
-            <button onClick={() => navigate(-1)} className="px-2 py-1 text-sm font-bold text-gray-800 border border-gray-800 bg-gray-200 hover:bg-gray-300">
-              <IoCaretBack className="text-gray-700" />
+            <button type="button" onClick={() => navigate(-1)} aria-label="Go back" className="px-2 py-1 text-sm font-bold text-gray-800 border border-gray-800 bg-gray-200 hover:bg-gray-300">
+              <IoCaretBack className="text-gray-700" aria-hidden="true" />
             </button>
-            <button onClick={() => navigate(1)} className="px-2 py-1 text-sm font-bold text-gray-800 border border-gray-800 bg-gray-200 hover:bg-gray-300 ml-2">
-              <IoCaretForward className="text-gray-700" />
+            <button type="button" onClick={() => navigate(1)} aria-label="Go forward" className="px-2 py-1 text-sm font-bold text-gray-800 border border-gray-800 bg-gray-200 hover:bg-gray-300 ml-2">
+              <IoCaretForward className="text-gray-700" aria-hidden="true" />
             </button>
-            <button onClick={() => window.location.reload()} className="px-2 py-1 text-sm font-bold text-gray-800 border border-gray-800 bg-gray-200 hover:bg-gray-300 ml-2">
-              <IoRefresh className="text-gray-700" />
+            <button type="button" onClick={() => window.location.reload()} aria-label="Reload page" className="px-2 py-1 text-sm font-bold text-gray-800 border border-gray-800 bg-gray-200 hover:bg-gray-300 ml-2">
+              <IoRefresh className="text-gray-700" aria-hidden="true" />
             </button>
             <input
               type="text"
               className="flex-1 mx-4 px-2 py-1 text-sm border border-gray-800 bg-gray-100 font-mono"
               value={displayUrl}
               readOnly
+              tabIndex={-1}
+              aria-hidden="true"
             />
-            <button className="px-2 py-1 text-sm font-bold text-gray-800 border border-gray-800 bg-gray-200 hover:bg-gray-300">
+            <button type="button" tabIndex={-1} aria-hidden="true" className="px-2 py-1 text-sm font-bold text-gray-800 border border-gray-800 bg-gray-200 hover:bg-gray-300">
               <IoSearch />
             </button>
           </div>
@@ -85,7 +133,8 @@ function AppLayout() {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.5 }}
               >
-                <div
+                <main
+                  id="main"
                   className={`w-full overflow-y-auto p-2 sm:p-6 md:px-8 rounded-xl no-scrollbar content-height ${
                     isHome ? 'max-w-[800px]' : 'max-w-[1100px]'
                   }`}
@@ -99,7 +148,7 @@ function AppLayout() {
                     <Route path="/contact" element={<Contact />} />
                     <Route path="*" element={<Section1 />} />
                   </Routes>
-                </div>
+                </main>
               </motion.div>
 
               {isHome && (
@@ -117,13 +166,6 @@ function AppLayout() {
         </div>
       </motion.div>
 
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.8, duration: 0.5 }}
-      >
-        <Footer />
-      </motion.div>
     </motion.div>
   );
 }
