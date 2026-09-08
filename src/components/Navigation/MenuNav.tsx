@@ -11,7 +11,7 @@ const navItems = [
 
 const MenuNav = () => {
   return (
-    <nav aria-label="Main" className="flex items-center justify-center h-10 sm:h-12 bg-gray-100 border-b-2 border-gray-800 px-1.5 sm:px-2 gap-1 sm:gap-2 overflow-x-auto no-scrollbar">
+    <nav aria-label="Main" className="crt-chrome flex items-center justify-center h-10 sm:h-12 bg-gray-100 border-b-2 border-gray-800 px-1.5 sm:px-2 gap-1 sm:gap-2 overflow-x-auto no-scrollbar">
       {navItems.map(({ path, label }) => (
         <NavLink
           key={path}

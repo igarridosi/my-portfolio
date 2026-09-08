@@ -75,7 +75,7 @@ const slideVariants = {
 /* ------------------------------------------------------------------ */
 
 const TrafficLights = ({ onClose }: { onClose?: () => void }) => {
-  const dot = 'w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full border border-gray-800';
+  const dot = 'w-3 h-3 sm:w-3.5 sm:h-3.5';
   return (
     <div className="flex gap-1.5 sm:gap-2">
       {onClose ? (
@@ -83,13 +83,13 @@ const TrafficLights = ({ onClose }: { onClose?: () => void }) => {
           type="button"
           onClick={onClose}
           aria-label="Close gallery"
-          className={`${dot} bg-red-500 hover:bg-red-400 transition-colors duration-200`}
+          className={`${dot} bg-tt-red hover:opacity-70 transition-opacity duration-150`}
         />
       ) : (
-        <span className={`${dot} bg-red-500`} />
+        <span className={`${dot} bg-tt-red`} />
       )}
-      <span className={`${dot} bg-yellow-500`} />
-      <span className={`${dot} bg-green-500`} />
+      <span className={`${dot} bg-tt-yellow`} />
+      <span className={`${dot} bg-tt-green`} />
     </div>
   );
 };
@@ -103,20 +103,20 @@ const WindowChrome = ({
 }) => (
   <>
     {/* Title bar */}
-    <div className="flex items-center gap-2.5 h-8 sm:h-9 px-3 bg-gray-200 border-b-2 border-gray-800">
+    <div className="flex items-center gap-3 h-9 sm:h-10 px-3 bg-black border-b-2 border-tt-cyan">
       <TrafficLights onClose={onClose} />
-      <span className="truncate font-mono text-[11px] font-bold text-gray-700">
+      <span className="truncate font-mono text-[11px] sm:text-xs uppercase tracking-[0.16em] text-tt-white">
         {project.name}
       </span>
-      <span className="ml-auto shrink-0 px-1.5 py-0.5 text-[9px] font-mono font-bold uppercase tracking-widest text-gray-600 bg-gray-100 border border-gray-400 rounded">
+      <span className="ml-auto shrink-0 px-2 py-0.5 text-[9px] sm:text-[10px] font-mono font-bold uppercase tracking-widest text-black bg-tt-cyan">
         {project.category}
       </span>
     </div>
 
     {/* Address bar */}
-    <div className="flex items-center gap-2 h-8 sm:h-9 px-3 bg-gray-300 border-b-2 border-gray-800">
-      <IoLockClosed className="shrink-0 text-[10px] text-gray-600" aria-hidden />
-      <div className="flex-1 min-w-0 px-2 py-0.5 font-mono text-[10px] sm:text-[11px] text-gray-700 truncate bg-gray-100 border border-gray-800 rounded-sm">
+    <div className="flex items-center gap-2 h-9 sm:h-10 px-3 bg-black border-b-2 border-tt-cyan">
+      <IoLockClosed className="shrink-0 text-[10px] text-tt-green" aria-hidden />
+      <div className="flex-1 min-w-0 px-2 py-1 font-mono text-[10px] sm:text-[11px] tracking-wide text-tt-green truncate bg-black border border-tt-cyan">
         {displayUrl(project)}
       </div>
       {project.demo && (
@@ -125,7 +125,7 @@ const WindowChrome = ({
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`Open ${project.name} in a new tab`}
-          className="shrink-0 px-1.5 py-1 text-[10px] text-gray-700 bg-gray-200 border border-gray-800 rounded-sm hover:bg-white transition-colors duration-200"
+          className="shrink-0 px-1.5 py-1 text-[10px] text-tt-cyan bg-black border border-tt-cyan hover:bg-tt-cyan hover:text-black transition-colors duration-150"
         >
           <FaExternalLinkAlt />
         </a>
@@ -323,7 +323,7 @@ const Lightbox = ({
         variants={panelVariants}
         transition={panelTransition}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-[96vw] max-h-full overflow-hidden bg-gray-100 border-2 sm:border-[3px] border-gray-800 rounded-lg sm:rounded-xl shadow-[6px_6px_0px_0px_rgba(31,41,55)] sm:shadow-[10px_10px_0px_0px_rgba(31,41,55)]"
+        className="tt-screen crt-screen crt-lines relative w-full max-w-[96vw] max-h-full overflow-hidden border-2 sm:border-[3px] border-gray-800 rounded-lg sm:rounded-xl"
       >
         <WindowChrome project={project} onClose={requestClose} />
 

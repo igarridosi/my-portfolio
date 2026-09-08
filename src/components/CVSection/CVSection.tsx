@@ -1,68 +1,32 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ImArrowDownRight2 } from 'react-icons/im';
 import { motion } from 'framer-motion';
 
 const CVSection = () => {
-  const navigate = useNavigate();
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [isHovered, setIsHovered] = useState(false);
-
-  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = Math.min(Math.max(event.clientX - rect.left, 50), rect.width - 50);
-    const y = Math.min(Math.max(event.clientY - rect.top, 50), rect.height - 50);
-    setMousePosition({ x, y });
-  };
-
   return (
     <section className="relative flex flex-col items-center w-full lg:h-full">
       <motion.div
-        className="relative w-full overflow-hidden flex justify-center items-start bg-gradient-to-b from-gray-300 to-white rounded-2xl cv-height lg:absolute lg:inset-0"
+        className="relative w-full overflow-hidden flex justify-center items-center bg-black cv-height lg:absolute lg:inset-0"
         initial={{ scale: 0.95, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.5 }}
-        onMouseMove={handleMouseMove}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
+        {/* The portrait is already a teletext page, black surround included, so
+            it is shown whole (`contain`) against the same black rather than
+            cropped, and carries no grayscale filter that would kill its palette.
+            `pixelated` keeps the character blocks crisp instead of smoothing
+            them away when the frame scales the image up. */}
         <motion.img
-          src="/img/Linkedin_Profile_Image_bg_remove.webp"
-          alt="Ibai Garrido"
-          className="w-full h-full object-cover filter grayscale object-top"
+          src="/img/teletext-portrait.webp"
+          alt="Ibai Garrido, rendered as a teletext page"
+          className="w-full h-full object-contain [image-rendering:pixelated]"
           fetchPriority="high"
           decoding="async"
           initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: isHovered ? 0.3 : 1, scale: 1 }}
+          animate={{ opacity: 1, scale: 1 }}
           transition={{
             opacity: { duration: 0.3 },
             scale: { duration: 0.8, ease: 'easeOut' },
           }}
         />
-
-        {!isHovered && (
-          <motion.div
-            className="absolute top-[240px] left-[50px] sm:top-[300px] sm:left-[100px] flex items-center gap-2 bg-white/90 px-3 py-1.5 rounded-full shadow-md"
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.3, ease: 'backOut' }}
-          >
-            <span className="font-mono font-bold text-base sm:text-lg text-gray-800">Me</span>
-            <ImArrowDownRight2 className="w-5 h-6 sm:w-6 sm:h-6 text-gray-800" />
-          </motion.div>
-        )}
-
-        {isHovered && (
-          <div
-            className="absolute w-24 sm:w-28 lg:w-32 h-24 sm:h-28 lg:h-32 flex text-center items-center justify-center cursor-pointer bg-gray-700 text-white rounded-full transition-all duration-75"
-            style={{ left: `${mousePosition.x}px`, top: `${mousePosition.y}px`, transform: 'translate(-50%, -50%)' }}
-            onClick={() => navigate('/contact')}
-          >
-            <p className="font-mono font-bold text-lg sm:text-xl lg:text-2xl m-2 sm:m-3 lg:m-4">
-              Contact Me👋
-            </p>
-          </div>
-        )}
       </motion.div>
     </section>
   );

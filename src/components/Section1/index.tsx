@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaEnvelope, FaCode, FaDownload, FaLinkedinIn, FaGithub, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaEnvelope, FaDownload, FaLinkedinIn, FaGithub, FaMapMarkerAlt } from 'react-icons/fa';
 import { useState, useEffect } from 'react';
 
 const ROLES = ['Developer', 'Engineer', 'Builder'];
@@ -80,11 +80,11 @@ const Section1 = () => {
           {/* One heading, three lines: screen readers announce
               "Fullstack Application Developer", not three separate titles. */}
           <h1>
-            <span className="hero-line-1 font-thin flex items-center gap-2 sm:gap-3 text-gray-900">
-              <FaCode className="text-gray-800" aria-hidden="true" />
+            <span className="hero-line-1 flex items-baseline gap-1.5 sm:gap-2 text-gray-900">
+              <span aria-hidden="true" className="text-[0.55em] leading-none">&lt;/&gt;</span>
               Fullstack
             </span>
-            <span className="hero-line-2 block font-bold font-serif text-gray-900">
+            <span className="hero-line-2 block font-bold text-gray-900">
               Application
             </span>
             <span className="hero-line-3 block font-mono text-gray-900">

@@ -1,10 +1,43 @@
 @import "tailwindcss";
 
+/* European Teletext (CC0), a recreation of the SAA5050 character generator the
+   broadcast pages actually used. Self-hosted: it is 6 KB as woff2, so a
+   round-trip to a font CDN would cost more than the file. */
+@font-face {
+  font-family: "European Teletext";
+  src: url("/fonts/EuropeanTeletextNuevo.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Tailwind v4 reads its theme from CSS, not from tailwind.config.js, so the
    palette lives here. (The old config had silently stopped applying.) */
 @theme {
   --color-background: #71737d;
   --color-ink: #1f2937;
+
+  /* The seven broadcast teletext colours, used verbatim. Anything softer stops
+     reading as teletext, which is the whole point of the reference. */
+  --color-tt-white: #ffffff;
+  --color-tt-yellow: #ffff00;
+  --color-tt-cyan: #00ffff;
+  --color-tt-green: #00ff00;
+  --color-tt-red: #ff3131;
+  --color-tt-blue: #0000aa;
+
+  /* One face for the whole site. The system monospace stack is only a
+     fallback for the moment before the 6 KB woff2 lands. */
+  --font-mono: "European Teletext", ui-monospace, SFMono-Regular, Menlo,
+    Consolas, "Liberation Mono", monospace;
+  --font-sans: "European Teletext", ui-monospace, SFMono-Regular, Menlo,
+    Consolas, monospace;
+  --font-display: "European Teletext", ui-monospace, monospace;
+}
+
+/* Every surface, including the browser chrome outside the teletext screen. */
+html {
+  font-family: var(--font-mono);
 }
 
 @layer utilities {
@@ -41,7 +74,10 @@
      it no longer fitted. Capping the scale by height as well as width keeps
      the proportions and makes it fit at any zoom level. */
   .hero-title {
-    --hero: clamp(2.25rem, min(9vw, 11vh), 8rem);
+    /* Capped so the longest line, `</>Fullstack`, always fits its column.
+       This is a monospace face with a 0.75em advance, so those twelve
+       characters need about 8em of width and the column offers ~736px. */
+    --hero: clamp(2rem, min(7.5vw, 8vh), 5.5rem);
     line-height: 1;
   }
   .hero-line-1 {
@@ -145,6 +181,48 @@
   animation: crt-flicker 4s steps(30) infinite;
 }
 
+/* The cursor trail. Each cell the mouse crosses drops one block that inverts
+   what is under it (`difference` against white gives 255 - backdrop, a true
+   inversion, so one element works over any surface) and then fades out. The
+   result is a path of pixels rather than a square glued to the pointer.
+
+   Blocks are created and removed as DOM nodes by App.tsx, never through React
+   state: a mousemove must not re-render the app. */
+/* The blend lives on the CONTAINER, not on the blocks. `position: fixed` plus
+   a z-index makes this layer its own stacking context, so a blend set on a
+   child could only see its siblings inside that context - an empty, fully
+   transparent backdrop - and the blocks rendered plain white. Blending the
+   whole layer instead lets it difference against the real page underneath,
+   which is what turns a block over blue into yellow. */
+.crt-trail {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+
+/* Size and timing measured off the reference recording, frame by frame:
+   cells land on a 96px grid, and a block holds one constant brightness for
+   ~12 frames then vanishes between two frames. There is no fade at all - the
+   earlier 620ms ramp is what made this feel soft and unfinished. `steps(1,
+   end)` reproduces that: opacity stays at 1 for the whole life, then snaps. */
+.crt-trail__block {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 68px;
+  height: 68px;
+  background: #fff;
+  animation: pixel-hold 180ms steps(1, end) forwards;
+}
+
+@keyframes pixel-hold {
+  to {
+    opacity: 0;
+  }
+}
+
 /* Scanlines across everything, the window included. This is what stops the
    window reading as a picture pasted on top: one grid over the whole screen
    means one screen. Kept much fainter than the backdrop's own scanlines
@@ -159,25 +237,28 @@
   opacity: 0.11;
 }
 
-/* The window as a lit screen rather than a card on a wall:
-     - the hard offset shadow stays, it is the site's signature
-     - a halo in the ambient hue bleeds the backdrop's light onto its edges
-     - an inner vignette curves the corners like a tube
-   The halo is a box-shadow, not a filter, so recolouring it every frame as
-   the cursor moves costs nothing. */
+/* The window as a lit screen. On the teletext black the old hard grey offset
+   was invisible against the CRT ground, so the depth now comes from the tube
+   itself: a tight dark seat under the frame, a cyan rim that reads as the
+   phosphor edge, and the ambient hue bleeding outward. Box-shadows, not a
+   filter, so recolouring them every frame as the cursor moves costs nothing. */
 .crt-screen {
   box-shadow:
-    3px 3px 0 0 var(--color-ink),
-    0 0 60px -12px hsl(var(--hue, 214) 70% 60% / 0.55),
-    0 0 140px -30px hsl(var(--hue, 214) 62% 54% / 0.4);
+    0 2px 0 0 rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(0, 255, 255, 0.35),
+    0 10px 26px -6px rgba(0, 0, 0, 0.85),
+    0 0 46px -8px hsl(var(--hue, 214) 70% 60% / 0.45),
+    0 0 120px -24px hsl(var(--hue, 214) 62% 54% / 0.4);
 }
 
 @media (min-width: 640px) {
   .crt-screen {
     box-shadow:
-      10px 10px 0 0 var(--color-ink),
-      0 0 90px -10px hsl(var(--hue, 214) 70% 60% / 0.6),
-      0 0 220px -40px hsl(var(--hue, 214) 62% 54% / 0.45);
+      0 3px 0 0 rgba(0, 0, 0, 0.9),
+      0 0 0 1px rgba(0, 255, 255, 0.4),
+      0 18px 44px -10px rgba(0, 0, 0, 0.85),
+      0 0 70px -8px hsl(var(--hue, 214) 70% 60% / 0.5),
+      0 0 190px -34px hsl(var(--hue, 214) 62% 54% / 0.45);
   }
 }
 
@@ -189,6 +270,78 @@
   pointer-events: none;
   border-radius: inherit;
   box-shadow: inset 0 0 70px rgba(31, 41, 55, 0.16);
+}
+
+/* Old-machine chrome. The bars were flat fills; a top-lit bevel is what makes
+   plastic read as plastic. Layered over whatever background colour the bar
+   already has, so the palette is unchanged. */
+.crt-chrome {
+  background-image: linear-gradient(
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0) 42%,
+    rgba(31, 41, 55, 0.07)
+  );
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.65),
+    inset 0 -1px 0 rgba(31, 41, 55, 0.1);
+}
+
+/* A single soft reflection across the glass, from the top-left. Kept faint and
+   confined to the corner so it never washes out the text underneath. */
+.crt-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(
+    134deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.14) 14%,
+    rgba(255, 255, 255, 0) 34%
+  );
+}
+
+/* Scanlines for a surface that sits ABOVE the global overlay. The project
+   lightbox is portalled to document.body at z-100, over every CRT layer, so it
+   cannot inherit them - without this it is the one panel on the site that is
+   not part of the tube. */
+.crt-lines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+  border-radius: inherit;
+  background-image: linear-gradient(rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.3) 51%);
+  background-size: 100% 6px;
+  opacity: 0.11;
+}
+
+/* The tube's edge, modelled on the reference's `crt.png`: not a rounded
+   rectangle but a barrel - the screen bulges out at the middle of each side
+   and pulls in hard at the corners - with a soft, blurred falloff into black.
+
+   Drawn as an SVG mask rather than border-radius because border-radius cannot
+   bow an edge outward. The outer rect and the inner screen path combine with
+   `fill-rule: evenodd`, so only the gap between them takes ink; the Gaussian
+   blur gives the soft edge that makes it read as glass instead of a border. */
+.crt-bezel {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cdefs%3E%3Cfilter id='b' x='-15%25' y='-15%25' width='130%25' height='130%25'%3E%3CfeGaussianBlur stdDeviation='0.28'/%3E%3C/filter%3E%3C/defs%3E%3Cpath fill='%23000' fill-rule='evenodd' filter='url(%23b)' d='M-4,-4H104V104H-4Z M1.6,0.7 Q50,-0.8 98.4,0.7 Q100.8,50 98.4,99.3 Q50,100.8 1.6,99.3 Q-0.8,50 1.6,0.7Z'/%3E%3C/svg%3E");
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+/* The broader falloff across the glass, the reference's `.gloom` layer. */
+.crt-bezel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(130% 130% at 50% 50%, rgba(0, 0, 0, 0) 74%, rgba(0, 0, 0, 0.2) 100%);
 }
 
 /* A single bright line sweeping down the tube, once every 9s. It sits above
@@ -266,4 +419,129 @@
   .btn-split:focus-visible .split-char {
     transform: none;
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Teletext screen                                                     */
+/* The content area is inverted to a broadcast page: black ground,     */
+/* monospace throughout, and the site's grey scale remapped onto the   */
+/* teletext palette.                                                   */
+/*                                                                     */
+/* Remapping here rather than editing six section components keeps one */
+/* source of truth for the theme and leaves those components readable  */
+/* as plain Tailwind. These rules sit outside @layer, so they win over */
+/* the utilities they override regardless of specificity.              */
+/* ------------------------------------------------------------------ */
+
+.tt-screen {
+  background: #000;
+  color: #fff;
+  font-family: var(--font-mono);
+  /* Teletext was a fixed character grid: a touch of tracking pulls the mono
+     closer to that rhythm without hurting reading speed. */
+  letter-spacing: 0.01em;
+}
+
+/* Headings and strong copy: cyan. */
+.tt-screen .text-gray-900,
+.tt-screen .text-gray-800 {
+  color: #0ff;
+}
+
+/* Body copy: white. It is the highest-contrast pair on black, which matters
+   most for the paragraphs someone actually sits and reads. */
+.tt-screen .text-gray-700,
+.tt-screen .text-gray-600,
+.tt-screen .text-gray-300 {
+  color: #fff;
+}
+
+/* Labels already sitting on a filled block keep their own colour. */
+.tt-screen .text-white {
+  color: #fff;
+}
+
+/* Labels, metadata, mono captions: yellow, as the schedule times were. */
+.tt-screen .text-gray-500,
+.tt-screen .text-gray-400 {
+  color: #ff0;
+}
+
+.tt-screen .text-green-600,
+.tt-screen .text-green-500 {
+  color: #0f0;
+}
+
+/* Every light surface collapses to the black ground. */
+.tt-screen .bg-white,
+.tt-screen .bg-gray-50,
+.tt-screen .bg-gray-100,
+.tt-screen .bg-gray-200 {
+  background-color: transparent;
+}
+
+/* Dark blocks become the teletext blue panel. */
+.tt-screen .bg-gray-800,
+.tt-screen .bg-gray-900 {
+  background-color: #0000aa;
+}
+
+/* Rules and frames are drawn in cyan, like the dashed separators. */
+.tt-screen .border-gray-200,
+.tt-screen .border-gray-300,
+.tt-screen .border-gray-700,
+.tt-screen .border-gray-800 {
+  border-color: #0ff;
+}
+
+/* The hard offset shadow reads as noise on black. */
+.tt-screen [class*="shadow-["] {
+  box-shadow: none;
+}
+
+/* Teletext had no round corners: it was a character grid. */
+.tt-screen .rounded,
+.tt-screen .rounded-md,
+.tt-screen .rounded-lg,
+.tt-screen .rounded-xl,
+.tt-screen .rounded-2xl,
+.tt-screen .rounded-full {
+  border-radius: 0;
+}
+
+/* The photo frame's light gradient punches a bright hole in the black. */
+.tt-screen .bg-gradient-to-b {
+  background-image: linear-gradient(#15161a, #000);
+}
+
+/* Everything the eye scans rather than reads: the broadcast face, in cyan.
+   Catching the elements rather than their utility classes keeps every heading
+   consistent regardless of which grey it was written with. */
+.tt-screen h1,
+.tt-screen h2,
+.tt-screen h3,
+.tt-screen .font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.04em;
+}
+
+.tt-screen h1,
+.tt-screen h2,
+.tt-screen h3 {
+  color: #0ff;
+}
+
+/* ...except where the heading sits on a filled block. */
+.tt-screen [class*="bg-gray-8"] h1,
+.tt-screen [class*="bg-gray-8"] h2,
+.tt-screen [class*="bg-gray-8"] h3,
+.tt-screen [class*="bg-gray-9"] h1,
+.tt-screen [class*="bg-gray-9"] h2,
+.tt-screen [class*="bg-gray-9"] h3 {
+  color: #fff;
+}
+
+/* Links inside the page keep the yellow the reference used for references. */
+.tt-screen a:not([class*="bg-"]):hover {
+  color: #ff0;
 }

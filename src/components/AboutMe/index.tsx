@@ -33,8 +33,8 @@ const facts = [
 const values = [
   {
     icon: <MdOutlineLayers className="text-2xl" />,
-    title: 'I own the whole stack, not just the screen',
-    text: "At SMARTENDS I wrote the Python services that chewed through high-frequency sensor data. At IRISBOND I worked down at the threading level in C#. In my own projects I design the database, the API and the client. Hand me a feature and I can take it from schema to pixel.",
+    title: 'I work on the whole stack, not just the interface',
+    text: "At SMARTENDS I wrote the Python services that processed high-frequency sensor data. At IRISBOND I worked at the threading level in C#. In my own projects I design the database, the API and the client, so I can take a feature from the data model to the finished screen.",
   },
   {
     icon: <MdOutlineSpeed className="text-2xl" />,
@@ -44,12 +44,12 @@ const values = [
   {
     icon: <MdOutlinePublic className="text-2xl" />,
     title: 'I already work across borders',
-    text: "Two internships in two countries, and I moved to Prague to keep going. I am used to English-speaking teams, asynchronous communication and being the person who asks the clarifying question early rather than guessing.",
+    text: "Two internships in two countries, and I moved to Prague to keep going. I am used to working in English, to teams spread across time zones, and to asking the question that clears things up early instead of guessing.",
   },
   {
     icon: <MdOutlineAutoAwesome className="text-2xl" />,
-    title: 'I ship fast without shipping mess',
-    text: "I use AI coding agents daily to move quickly, then review everything that lands. Git, code review and iterative delivery are habits, not requirements someone imposed on me. I would rather ask why a feature exists than build the wrong thing well.",
+    title: 'I move fast without cutting corners',
+    text: "I use AI coding agents every day to work quickly, then review everything they write before it ships. Git, code review and delivering in small steps are habits of mine, not rules someone imposed on me. Before I build a feature, I ask what problem it solves.",
   },
 ];
 

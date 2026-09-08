@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { IoCaretBack, IoCaretForward, IoRefresh, IoSearch } from 'react-icons/io5';
@@ -9,12 +9,26 @@ import AboutMe from './components/AboutMe';
 import Experience from './components/Experience';
 import Projects from './components/Projects';
 import Skills from './components/Skills';
-import MenuNav from './components/Navigation/MenuNav';
+import {
+  TeletextHeader,
+  TeletextFooter,
+  TeletextNav,
+} from './components/Teletext/TeletextBars';
 import Contact from './components/Contact';
+
+/* Spacing of the grid the trail snaps to. */
+const TRAIL_CELL = 96;
+/* Size of the block itself, deliberately smaller than the cell. When the two
+   match, two blocks in neighbouring cells sit edge to edge and read as one
+   rectangle, so a trail turns into a run of odd L-shapes and bars. Leaving a
+   gap keeps every block a separate, identical square. */
+const TRAIL_SIZE = 68;
+const TRAIL_MAX = 24;
 
 function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const trailRef = useRef<HTMLDivElement>(null);
   // The tube's colour follows the pointer. Writing CSS variables straight to
   // the node (rather than through state) keeps this off React's render path:
   // a mousemove must never re-render the app. Coalesced into one rAF so we
@@ -25,6 +39,7 @@ function AppLayout() {
     let frame = 0;
     let x = 0;
     let y = 0;
+    let lastCell = '';
     const el = document.documentElement;
 
     const paint = () => {
@@ -36,9 +51,37 @@ function AppLayout() {
       // Sweep a calm arc of the colour wheel across the screen: deep blue on
       // the left through to violet on the right, never a full rainbow.
       el.style.setProperty('--hue', (196 + (px / 100) * 92).toFixed(1));
+
+      // Drop a block on each new grid cell the cursor enters. Snapping to the
+      // grid is what makes it read as pixels; keying on the cell stops a slow
+      // mouse from stacking dozens of them in one spot.
+      const layer = trailRef.current;
+      if (!layer) return;
+      const cx = Math.round(x / TRAIL_CELL) * TRAIL_CELL;
+      const cy = Math.round(y / TRAIL_CELL) * TRAIL_CELL;
+      const key = `${cx}:${cy}`;
+      if (key === lastCell) return;
+      lastCell = key;
+
+      const block = document.createElement('span');
+      block.className = 'crt-trail__block';
+      // Centre the block on the cell so the gap is even on all four sides.
+      block.style.transform =
+        `translate3d(${cx - TRAIL_SIZE / 2}px, ${cy - TRAIL_SIZE / 2}px, 0)`;
+      block.addEventListener('animationend', () => block.remove(), { once: true });
+      layer.appendChild(block);
+
+      // Safety net: if animationend never fires (background tab), the layer
+      // still cannot grow without bound.
+      while (layer.childElementCount > TRAIL_MAX) {
+        layer.firstElementChild?.remove();
+      }
     };
 
     const onMove = (e: PointerEvent) => {
+      // Mouse only. A finger drag also fires pointermove, and the inverted
+      // pixel chasing a thumb across a phone screen is noise, not character.
+      if (e.pointerType !== 'mouse') return;
       x = e.clientX;
       y = e.clientY;
       if (!frame) frame = requestAnimationFrame(paint);
@@ -48,6 +91,7 @@ function AppLayout() {
     return () => {
       window.removeEventListener('pointermove', onMove);
       if (frame) cancelAnimationFrame(frame);
+      if (trailRef.current) trailRef.current.replaceChildren();
     };
   }, []);
   const displayUrl = `https://www.your-next-developer.dev${location.pathname}`;
@@ -55,7 +99,7 @@ function AppLayout() {
 
   return (
     <motion.div
-      className="relative min-h-screen flex flex-col"
+      className="relative isolate min-h-screen flex flex-col"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
@@ -64,6 +108,8 @@ function AppLayout() {
       <div className="crt-bg" aria-hidden="true" />
       <div className="crt-overlay" aria-hidden="true" />
       <div className="crt-sweep" aria-hidden="true" />
+      <div className="crt-bezel" aria-hidden="true" />
+      <div ref={trailRef} className="crt-trail" aria-hidden="true" />
 
       <a
         href="#main"
@@ -84,44 +130,51 @@ function AppLayout() {
         <div className="crt-screen relative my-auto w-full sm:w-[90%] lg:w-[80%] max-w-[1700px] overflow-hidden border-2 sm:border-3 border-gray-800 bg-gray-100 rounded-lg sm:rounded-xl">
 
           {/* Traffic lights bar */}
-          <div className="flex items-center h-8 sm:h-10 bg-gray-200 border-b-2 border-gray-800 px-3 sm:px-4">
+          <div className="flex items-center h-9 sm:h-11 bg-black border-b-2 border-tt-cyan px-3 sm:px-5">
+            {/* Square, not round: teletext drew everything on a character grid. */}
             <div className="flex gap-1.5 sm:gap-2">
-              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500 border border-gray-800" />
-              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500 border border-gray-800" />
-              <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500 border border-gray-800" />
+              <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 bg-tt-red" />
+              <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 bg-tt-yellow" />
+              <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 bg-tt-green" />
             </div>
+            <span className="ml-3 sm:ml-4 font-mono text-[10px] sm:text-xs uppercase tracking-[0.2em] text-tt-cyan">
+              Ibai Garrido
+            </span>
           </div>
 
           {/* Address bar */}
-          <div className="hidden md:flex items-center h-10 bg-gray-300 border-b-2 border-gray-800 px-4">
-            <button type="button" onClick={() => navigate(-1)} aria-label="Go back" className="px-2 py-1 text-sm font-bold text-gray-800 border border-gray-800 bg-gray-200 hover:bg-gray-300">
-              <IoCaretBack className="text-gray-700" aria-hidden="true" />
+          <div className="hidden md:flex items-center h-11 bg-black border-b-2 border-tt-cyan px-4 gap-2">
+            <button type="button" onClick={() => navigate(-1)} aria-label="Go back" className="px-2 py-1 text-sm font-bold text-tt-cyan border border-tt-cyan bg-black hover:bg-tt-cyan hover:text-black transition-colors duration-100">
+              <IoCaretBack aria-hidden="true" />
             </button>
-            <button type="button" onClick={() => navigate(1)} aria-label="Go forward" className="px-2 py-1 text-sm font-bold text-gray-800 border border-gray-800 bg-gray-200 hover:bg-gray-300 ml-2">
-              <IoCaretForward className="text-gray-700" aria-hidden="true" />
+            <button type="button" onClick={() => navigate(1)} aria-label="Go forward" className="px-2 py-1 text-sm font-bold text-tt-cyan border border-tt-cyan bg-black hover:bg-tt-cyan hover:text-black transition-colors duration-100">
+              <IoCaretForward aria-hidden="true" />
             </button>
-            <button type="button" onClick={() => window.location.reload()} aria-label="Reload page" className="px-2 py-1 text-sm font-bold text-gray-800 border border-gray-800 bg-gray-200 hover:bg-gray-300 ml-2">
-              <IoRefresh className="text-gray-700" aria-hidden="true" />
+            <button type="button" onClick={() => window.location.reload()} aria-label="Reload page" className="px-2 py-1 text-sm font-bold text-tt-cyan border border-tt-cyan bg-black hover:bg-tt-cyan hover:text-black transition-colors duration-100">
+              <IoRefresh aria-hidden="true" />
             </button>
             <input
               type="text"
-              className="flex-1 mx-4 px-2 py-1 text-sm border border-gray-800 bg-gray-100 font-mono"
+              className="flex-1 px-2 py-1 text-sm border border-tt-cyan bg-black text-tt-green font-mono tracking-wide"
               value={displayUrl}
               readOnly
               tabIndex={-1}
               aria-hidden="true"
             />
-            <button type="button" tabIndex={-1} aria-hidden="true" className="px-2 py-1 text-sm font-bold text-gray-800 border border-gray-800 bg-gray-200 hover:bg-gray-300">
+            <button type="button" tabIndex={-1} aria-hidden="true" className="px-2 py-1 text-sm font-bold text-tt-cyan border border-tt-cyan bg-black hover:bg-tt-cyan hover:text-black transition-colors duration-100">
               <IoSearch />
             </button>
           </div>
 
-          {/* Navigation bookmarks bar */}
-          <MenuNav />
+          {/* Navigation, drawn as a teletext index row */}
+          <TeletextNav />
 
           {/* Main content. The photo only earns its space on the landing page;
               every other route gets the full width for actual content. */}
-          <div className="p-3 sm:p-6 lg:p-10 bg-white">
+          <div className="tt-screen crt-glass relative">
+            <TeletextHeader pathname={location.pathname} />
+
+            <div className="px-3 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-2.5">
             <div
               className={`grid grid-cols-1 gap-4 sm:gap-6 w-full ${
                 isHome ? 'lg:grid-cols-[3fr_2fr]' : ''
@@ -161,7 +214,10 @@ function AppLayout() {
                   <CVSection />
                 </motion.div>
               )}
+              </div>
             </div>
+
+            <TeletextFooter />
           </div>
         </div>
       </motion.div>
