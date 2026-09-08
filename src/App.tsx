@@ -16,14 +16,19 @@ import {
 } from './components/Teletext/TeletextBars';
 import Contact from './components/Contact';
 
-/* Spacing of the grid the trail snaps to. */
-const TRAIL_CELL = 96;
-/* Size of the block itself, deliberately smaller than the cell. When the two
-   match, two blocks in neighbouring cells sit edge to edge and read as one
-   rectangle, so a trail turns into a run of odd L-shapes and bars. Leaving a
-   gap keeps every block a separate, identical square. */
-const TRAIL_SIZE = 68;
-const TRAIL_MAX = 24;
+/* Spacing of the grid the trail snaps to, and the size of the block drawn on
+   it - they are the same number on purpose. A block smaller than its cell
+   leaves a permanent margin around every square, so even a slow, continuous
+   sweep comes out as a dotted line. Equal to the cell, the blocks tile: a
+   run of them is unbroken, and the only holes left are whole cells the
+   cursor genuinely skipped. Declared as `--trail-cell` in index.css, which
+   is where the block's width and height come from. */
+const TRAIL_CELL = 68;
+const TRAIL_MAX = 40;
+/* Ceiling on how many cells one frame may fill in. A pointer flung across a
+   4K screen can cross fifty cells between frames; drawing all of them is
+   both pointless and a long synchronous DOM write. */
+const TRAIL_MAX_STEP = 16;
 
 function AppLayout() {
   const location = useLocation();
@@ -39,8 +44,22 @@ function AppLayout() {
     let frame = 0;
     let x = 0;
     let y = 0;
-    let lastCell = '';
+    // Last cell painted, as grid coordinates. `null` until the first frame,
+    // so the pointer entering the window drops a single block rather than
+    // drawing a line from the top-left corner to wherever it appeared.
+    let prev: { col: number; row: number } | null = null;
     const el = document.documentElement;
+
+    const dropBlock = (layer: HTMLElement, col: number, row: number) => {
+      const block = document.createElement('span');
+      block.className = 'crt-trail__block';
+      // Snap to the cell's own corner. Centring on the cursor instead would
+      // put the block astride two cells and break the tiling.
+      block.style.transform =
+        `translate3d(${col * TRAIL_CELL}px, ${row * TRAIL_CELL}px, 0)`;
+      block.addEventListener('animationend', () => block.remove(), { once: true });
+      layer.appendChild(block);
+    };
 
     const paint = () => {
       frame = 0;
@@ -57,19 +76,30 @@ function AppLayout() {
       // mouse from stacking dozens of them in one spot.
       const layer = trailRef.current;
       if (!layer) return;
-      const cx = Math.round(x / TRAIL_CELL) * TRAIL_CELL;
-      const cy = Math.round(y / TRAIL_CELL) * TRAIL_CELL;
-      const key = `${cx}:${cy}`;
-      if (key === lastCell) return;
-      lastCell = key;
+      const col = Math.floor(x / TRAIL_CELL);
+      const row = Math.floor(y / TRAIL_CELL);
+      if (prev && prev.col === col && prev.row === row) return;
 
-      const block = document.createElement('span');
-      block.className = 'crt-trail__block';
-      // Centre the block on the cell so the gap is even on all four sides.
-      block.style.transform =
-        `translate3d(${cx - TRAIL_SIZE / 2}px, ${cy - TRAIL_SIZE / 2}px, 0)`;
-      block.addEventListener('animationend', () => block.remove(), { once: true });
-      layer.appendChild(block);
+      if (!prev) {
+        dropBlock(layer, col, row);
+      } else {
+        // The pointer reports one position per frame, so anything quicker
+        // than a cell per frame teleports and leaves the trail perforated.
+        // Walk the cells between the last one and this one instead: one step
+        // per cell along the longer axis, which is Bresenham's line reduced
+        // to the case where both endpoints are already known.
+        const dc = col - prev.col;
+        const dr = row - prev.row;
+        const steps = Math.min(Math.max(Math.abs(dc), Math.abs(dr)), TRAIL_MAX_STEP);
+        for (let i = 1; i <= steps; i += 1) {
+          dropBlock(
+            layer,
+            prev.col + Math.round((dc * i) / steps),
+            prev.row + Math.round((dr * i) / steps),
+          );
+        }
+      }
+      prev = { col, row };
 
       // Safety net: if animationend never fires (background tab), the layer
       // still cannot grow without bound.
@@ -87,9 +117,20 @@ function AppLayout() {
       if (!frame) frame = requestAnimationFrame(paint);
     };
 
+    // Leaving the window ends the stroke. Without this, coming back in on the
+    // far side would draw a line across the whole screen to reconnect with a
+    // cell the cursor left minutes ago.
+    const onLeave = () => {
+      prev = null;
+    };
+
     window.addEventListener('pointermove', onMove, { passive: true });
+    document.addEventListener('pointerleave', onLeave);
+    window.addEventListener('blur', onLeave);
     return () => {
       window.removeEventListener('pointermove', onMove);
+      document.removeEventListener('pointerleave', onLeave);
+      window.removeEventListener('blur', onLeave);
       if (frame) cancelAnimationFrame(frame);
       if (trailRef.current) trailRef.current.replaceChildren();
     };

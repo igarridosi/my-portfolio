@@ -202,17 +202,25 @@ html {
   mix-blend-mode: difference;
 }
 
-/* Size and timing measured off the reference recording, frame by frame:
-   cells land on a 96px grid, and a block holds one constant brightness for
-   ~12 frames then vanishes between two frames. There is no fade at all - the
-   earlier 620ms ramp is what made this feel soft and unfinished. `steps(1,
-   end)` reproduces that: opacity stays at 1 for the whole life, then snaps. */
+/* Timing measured off the reference recording, frame by frame: a block holds
+   one constant brightness for ~12 frames then vanishes between two frames.
+   There is no fade at all - the earlier 620ms ramp is what made this feel
+   soft and unfinished. `steps(1, end)` reproduces that: opacity stays at 1
+   for the whole life, then snaps.
+
+   The block fills its cell exactly. `--trail-cell` is the one place the size
+   is written down; App.tsx reads it back so the grid it snaps to and the
+   block drawn on it can never drift apart. */
+.crt-trail {
+  --trail-cell: 68px;
+}
+
 .crt-trail__block {
   position: absolute;
   top: 0;
   left: 0;
-  width: 68px;
-  height: 68px;
+  width: var(--trail-cell);
+  height: var(--trail-cell);
   background: #fff;
   animation: pixel-hold 180ms steps(1, end) forwards;
 }
