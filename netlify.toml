@@ -1,7 +1,28 @@
 [build]
   functions = "netlify/functions"
 
+# Send the old free subdomain to the real one. Netlify normally does this by
+# itself once a primary domain is set, but that is an implicit rule and the
+# SPA catch-all below matches every path before it ever gets a turn, so the
+# old address just kept serving the site. Declaring it here puts it first.
+#
+# `force` is what makes it fire for paths that exist as real files: without
+# it, a request for `/` would find index.html and stop. `:splat` carries the
+# path over, so an old CV linking to /projects still lands on /projects.
 [[redirects]]
-from = "/*"
-to = "/index.html"
-status = 200
+  from = "https://ibaigarrido-portfolio.netlify.app/*"
+  to = "https://ibaigarrido.dev/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://ibaigarrido-portfolio.netlify.app/*"
+  to = "https://ibaigarrido.dev/:splat"
+  status = 301
+  force = true
+
+# Client-side routing: every path is served by the app itself.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

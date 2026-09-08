@@ -135,7 +135,7 @@ function AppLayout() {
       if (trailRef.current) trailRef.current.replaceChildren();
     };
   }, []);
-  const displayUrl = `https://www.your-next-developer.dev${location.pathname}`;
+  const displayUrl = `https://ibaigarrido.dev${location.pathname}`;
   const isHome = location.pathname === '/';
 
   return (

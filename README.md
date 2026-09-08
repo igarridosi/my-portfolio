@@ -1,7 +1,7 @@
 # Ibai Garrido — Developer Portfolio
 
 Personal portfolio built as a retro browser window: the chrome, the address bar and the
-bookmark tabs are the navigation. Live at **[ibaigarrido-portfolio.netlify.app](https://ibaigarrido-portfolio.netlify.app/)**.
+bookmark tabs are the navigation. Live at **[ibaigarrido.dev](https://ibaigarrido.dev/)**.
 
 <!-- TODO: add a screenshot of the portfolio itself here (docs/screenshot.webp).
      A README with a picture is the difference between someone reading it and scrolling past. -->
