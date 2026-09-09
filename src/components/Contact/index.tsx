@@ -25,34 +25,74 @@ const DIRECT_LINKS = [
   },
 ];
 
+const OWNER_EMAIL = 'garridotab4@gmail.com';
+
+/* EmailJS occasionally refuses a request that looks perfectly fine from here:
+   the Gmail authorisation behind the service expires, the monthly quota runs
+   out, or - most often for a portfolio - the visitor runs an ad blocker and
+   `api.emailjs.com` never gets called at all. None of that is recoverable in
+   the browser, so the promise is given a deadline and the failure is made
+   useful instead of being swallowed. */
+const SEND_TIMEOUT_MS = 15000;
+
+/** A message that failed to send is not lost: it is handed to the visitor's
+    own mail client, already written. */
+const mailtoFallback = (name: string, email: string, message: string) =>
+  `mailto:${OWNER_EMAIL}?subject=${encodeURIComponent(
+    `Portfolio enquiry from ${name || 'a visitor'}`,
+  )}&body=${encodeURIComponent(`${message}
+
+-- 
+${name}
+${email}`)}`;
+
 const Contact = () => {
   const [formData, setFormData] = useState({ name: '', email: '', message: '' });
   const [status, setStatus] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (status === 'sending') return;
     setStatus('sending');
 
-    emailjs.send(
-      import.meta.env.VITE_EMAILJS_SERVICE_ID,
-      import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
-      {
-        to_email: 'garridotab4@gmail.com',
-        from_name: formData.name,
-        from_email: formData.email,
-        message: formData.message,
-      },
-      import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-    )
-    .then(() => {
+    try {
+      await Promise.race([
+        emailjs.send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID,
+          import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+          {
+            to_email: OWNER_EMAIL,
+            from_name: formData.name,
+            from_email: formData.email,
+            message: formData.message,
+          },
+          { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY },
+        ),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error(`No response after ${SEND_TIMEOUT_MS}ms`)),
+            SEND_TIMEOUT_MS,
+          ),
+        ),
+      ]);
       setStatus('success');
       setFormData({ name: '', email: '', message: '' });
-      setTimeout(() => setStatus(''), 3000);
-    })
-    .catch(() => {
+      setTimeout(() => setStatus(''), 4000);
+    } catch (err) {
+      // The old handler discarded this. EmailJS puts the real reason in
+      // `text` (expired Gmail token, quota exceeded, bad template id), which
+      // is the difference between fixing this in a minute and guessing.
+      const detail =
+        err && typeof err === 'object' && 'text' in err
+          ? (err as { text: string }).text
+          : err instanceof Error
+            ? err.message
+            : String(err);
+      console.error('[contact] send failed:', detail, err);
       setStatus('error');
-      setTimeout(() => setStatus(''), 3000);
-    });
+      // No auto-dismiss on failure: the fallback link below has to stay put
+      // long enough for the visitor to actually use it.
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -184,9 +224,23 @@ const Contact = () => {
           </motion.p>
         )}
         {status === 'error' && (
-          <motion.p className="text-red-600 text-center text-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            Failed to send message. Please try again.
-          </motion.p>
+          <motion.div
+            className="text-center text-sm space-y-1"
+            role="alert"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <p className="text-red-600">Couldn't send that from here.</p>
+            <p className="text-gray-500">
+              <a
+                href={mailtoFallback(formData.name, formData.email, formData.message)}
+                className="underline hover:no-underline"
+              >
+                Open it in your mail app instead
+              </a>{' '}
+              - your message is kept.
+            </p>
+          </motion.div>
         )}
       </motion.form>
     </motion.div>
