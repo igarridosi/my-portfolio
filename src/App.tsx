@@ -14,6 +14,7 @@ import {
   TeletextFooter,
   TeletextNav,
 } from './components/Teletext/TeletextBars';
+import { PageWipe, usePageWipe } from './components/Teletext/PageWipe';
 import Contact from './components/Contact';
 
 /* Spacing of the grid the trail snaps to, and the size of the block drawn on
@@ -33,6 +34,9 @@ const TRAIL_MAX_STEP = 16;
 function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  // `displayed` lags the real route until the wipe has covered the screen, so
+  // the page never changes in plain sight.
+  const { displayed, active: wiping, run: wipeRun } = usePageWipe();
   const trailRef = useRef<HTMLDivElement>(null);
   // The tube's colour follows the pointer. Writing CSS variables straight to
   // the node (rather than through state) keeps this off React's render path:
@@ -135,8 +139,10 @@ function AppLayout() {
       if (trailRef.current) trailRef.current.replaceChildren();
     };
   }, []);
+  // The address bar follows the click straight away - that is the chrome
+  // acknowledging the navigation - while everything inside the screen waits.
   const displayUrl = `https://ibaigarrido.dev${location.pathname}`;
-  const isHome = location.pathname === '/';
+  const isHome = displayed.pathname === '/';
 
   return (
     <motion.div
@@ -168,7 +174,7 @@ function AppLayout() {
         transition={{ delay: 0.2, duration: 0.5 }}
       >
         {/* Retro browser window */}
-        <div className="crt-screen relative my-auto w-full sm:w-[90%] lg:w-[80%] max-w-[1700px] overflow-hidden border-2 sm:border-3 border-gray-800 bg-gray-100 rounded-lg sm:rounded-xl">
+        <div className="crt-screen relative my-auto w-full sm:w-[90%] lg:w-[80%] max-w-[1700px] overflow-hidden border-2 sm:border-3 border-gray-800 bg-[#0c0d10] rounded-lg sm:rounded-xl">
 
           {/* Traffic lights bar */}
           <div className="flex items-center h-9 sm:h-11 bg-black border-b-2 border-tt-cyan px-3 sm:px-5">
@@ -207,13 +213,18 @@ function AppLayout() {
             </button>
           </div>
 
+          {/* Everything below the address bar is the tube: the index row, the
+              page and its footer. It is wrapped so that it can be switched off
+              as one thing when a project takes over the screen. */}
+          <div className="crt-tube">
           {/* Navigation, drawn as a teletext index row */}
           <TeletextNav />
 
           {/* Main content. The photo only earns its space on the landing page;
               every other route gets the full width for actual content. */}
           <div className="tt-screen crt-glass relative">
-            <TeletextHeader pathname={location.pathname} />
+            <PageWipe active={wiping} run={wipeRun} />
+            <TeletextHeader pathname={displayed.pathname} />
 
             <div className="px-3 py-2 sm:px-5 sm:py-2.5 lg:px-6 lg:py-2.5">
             <div
@@ -233,7 +244,7 @@ function AppLayout() {
                     isHome ? 'max-w-[800px]' : 'max-w-[1100px]'
                   }`}
                 >
-                  <Routes>
+                  <Routes location={displayed}>
                     <Route path="/" element={<Section1 />} />
                     <Route path="/about" element={<AboutMe />} />
                     <Route path="/experience" element={<Experience />} />
@@ -259,6 +270,7 @@ function AppLayout() {
             </div>
 
             <TeletextFooter />
+          </div>
           </div>
         </div>
       </motion.div>

@@ -553,3 +553,642 @@ html {
 .tt-screen a:not([class*="bg-"]):hover {
   color: #ff0;
 }
+
+/* ---------------------------------------------------------------------------
+   Page wipe: a handset is pressed and the set changes channel. The picture
+   collapses into a line, holds through a moment of static, and opens on the
+   new page. Transform and opacity only, so it stays on the compositor.
+   --------------------------------------------------------------------------- */
+.tt-wipe {
+  position: absolute;
+  inset: 0;
+  z-index: 80;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* --- the handset ---------------------------------------------------------- */
+
+.tt-wipe__stage {
+  position: absolute;
+  /* Sits to the right of centre, close to the frame edge the hand comes in
+     from. */
+  right: -3%;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  transform: translate(115%, 115%);
+  animation:
+    tt-stage-in var(--remote-in-ms) cubic-bezier(0.2, 0.85, 0.3, 1.06)
+      var(--remote-in-at) both,
+    tt-stage-out 340ms cubic-bezier(0.6, 0, 0.9, 0.3) var(--exit-at) forwards;
+}
+
+/* In from the bottom right corner, the way someone lifts a handset into
+   frame rather than the way a card slides on. */
+@keyframes tt-stage-in {
+  from {
+    transform: translate(115%, 115%);
+  }
+  to {
+    /* Lifted clear of the bottom edge. The hand reaches up from below the
+       frame to the key, so the handset has to leave room underneath it. */
+    transform: translate(0, -28%);
+  }
+}
+
+@keyframes tt-stage-out {
+  to {
+    transform: translate(60%, 115%);
+    opacity: 0;
+  }
+}
+
+.tt-wipe__remote {
+  width: clamp(150px, 20vw, 272px);
+  height: auto;
+  filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.85));
+}
+
+.tt-wipe__hand {
+  width: clamp(92px, 12vw, 160px);
+  height: auto;
+  /* Slid left over the handset so the extended thumb sits on the yellow
+     fastext key. The exact figure is measured against the key's own box. */
+  /* The raised fingertip is the contact point, so the hand sits low and to
+     the right of the handset and reaches up to the key. The vertical part
+     lives in the transform, not in a margin: percentage margins resolve
+     against the container's *width*, so a vertical nudge written that way
+     drifts with the viewport. Transform percentages resolve against the
+     element's own box, which is what this alignment depends on. */
+  margin-left: -45%;
+  margin-bottom: 0;
+  transform: translate(53%, 43%);
+  animation: tt-hand var(--hand-ms) cubic-bezier(0.25, 0.8, 0.35, 1)
+    var(--hand-in-at) both;
+}
+
+/* Arrival, jab and recovery in one timeline: three separate animations would
+   be three writers fighting over the same transform. The jab is short and
+   lands hard, because a thumb hitting a key is not a glide. */
+/* Arrival, jab and recovery in one timeline. The jab pushes the fingertip
+   *into* the key - up and slightly left, along the finger - rather than
+   downwards, because this hand points upwards. */
+@keyframes tt-hand {
+  0% {
+    transform: translate(150%, 52%);
+  }
+  62% {
+    transform: translate(53%, 43%);
+  }
+  74% {
+    transform: translate(52%, 38%);
+  }
+  86% {
+    transform: translate(52%, 38%);
+  }
+  100% {
+    transform: translate(53%, 43%);
+  }
+}
+
+.tt-wipe__key {
+  /* Without `fill-box` the origin would be the whole SVG's, and the key would
+     swing across the handset instead of sinking into it. */
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: tt-key-press var(--press-ms) cubic-bezier(0.4, 0, 0.5, 1)
+    var(--press-at) both;
+}
+
+/* The key is yellow before, during and after. A press is a key going down,
+   not a key changing colour - the earlier white flash was a different shape
+   in a different colour appearing on top of it, which read as a bug. */
+@keyframes tt-key-press {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: none;
+  }
+  35%,
+  70% {
+    transform: scale(0.8);
+    filter: drop-shadow(0 0 5px #ffff00);
+  }
+}
+
+/* --- changing channel ----------------------------------------------------- */
+
+/* Two shutters squeeze the picture into a line and then let it back out. The
+   second animation is `forwards` rather than `both` on purpose: with
+   `both` its backwards fill would apply the open state during its own delay
+   and undo the close before it ever happened. */
+.tt-wipe__shutter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: #000;
+  transform: scaleY(0);
+  animation:
+    tt-shut var(--close-ms) cubic-bezier(0.7, 0, 0.85, 0.4) var(--close-at) both,
+    tt-open var(--open-ms) cubic-bezier(0.16, 0.9, 0.3, 1) var(--open-at) forwards;
+}
+
+.tt-wipe__shutter--top {
+  top: 0;
+  transform-origin: 50% 0;
+}
+
+.tt-wipe__shutter--bottom {
+  bottom: 0;
+  transform-origin: 50% 100%;
+}
+
+@keyframes tt-shut {
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes tt-open {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(0);
+  }
+}
+
+/* The bright seam a tube leaves behind as the picture dies. It outlives the
+   shutters by a moment at each end so the line is never seen to be made of
+   two things meeting. */
+.tt-wipe__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  margin-top: -1.5px;
+  background: #ffffff;
+  box-shadow: 0 0 18px 3px rgba(255, 255, 255, 0.75);
+  opacity: 0;
+  transform: scaleX(0.2);
+  animation: tt-line var(--line-ms) linear var(--line-at) both;
+}
+
+@keyframes tt-line {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.2);
+  }
+  12% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  /* The flicker of a set hunting for the new channel. */
+  46% {
+    opacity: 0.55;
+  }
+  54% {
+    opacity: 1;
+  }
+  88% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+}
+
+/* A breath of snow between the two channels. Kept faint and brief: this is a
+   punctuation mark, not an effect. */
+.tt-wipe__static {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.5) 0 1px,
+    transparent 1px 3px
+  );
+  animation: tt-static 260ms steps(4, end) var(--line-at) both;
+}
+
+@keyframes tt-static {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.22;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-wipe {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Projects: a shelf of television sets stood around a cylinder.
+
+   Each set is rotated its own step around a shared axis and pushed out by the
+   radius. The curve and the squeeze at the edges are real perspective, which
+   is why it reads as a shelf rather than as a row of shrinking cards.
+   --------------------------------------------------------------------------- */
+.tv-carousel {
+  /* As large as the fixed page height allows. Everything else in this section
+     has been trimmed to the bone to pay for it. */
+  --tv-w: clamp(190px, 31vw, 440px);
+  --tv-step: 30deg;
+  /* The distance between two sets is the chord 2R*sin(step/2), which at this
+     radius is about 1.19 of a set: a fifth of a set of clear air between each
+     one. At 1.8 the chord was 0.93 and the cases overlapped, which is what
+     made the shelf look stacked rather than arranged. */
+  --tv-radius: calc(var(--tv-w) * 2.3);
+  --tv-move: 560ms;
+  --tv-ease: cubic-bezier(0.22, 1, 0.28, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* The section is a fixed box and the shelf no longer fills it, so it is
+     centred in what is left rather than sitting at the top with a hole
+     underneath. */
+  height: 100%;
+  gap: clamp(0.9rem, 2.2vh, 1.9rem);
+  width: 100%;
+  /* The sets at the ends reach past the frame, and being absolutely positioned
+     they would otherwise widen the scroll area of the page behind them.
+     Clipped here rather than on `.tv-stage`, because an element carrying
+     `preserve-3d` loses it the moment its overflow stops being visible - which
+     would flatten the cylinder. */
+  overflow: hidden;
+}
+
+/* --- the title above the shelf ------------------------------------------- */
+
+/* The title block stands apart from the shelf rather than crowding it: the
+   gap above comes from the carousel's own spacing, and this adds the rest. */
+.tv-marquee {
+  text-align: center;
+  max-width: 62ch;
+  padding: 0 1rem;
+}
+
+.tv-marquee__name {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 3vw, 2.2rem);
+  line-height: 1.05;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #0ff;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.5em;
+}
+
+.tv-marquee__text {
+  display: inline-block;
+}
+
+.tv-marquee__page {
+  font-size: 0.42em;
+  color: #ff0;
+  font-variant-numeric: tabular-nums;
+}
+
+.tv-marquee__line {
+  font-size: clamp(0.7rem, 1.05vw, 0.85rem);
+  line-height: 1.5;
+  color: #fff;
+  opacity: 0.78;
+  margin-top: 0.5rem;
+}
+
+/* Characters arrive one after another, each in three visible stages rather
+   than a smooth fade: the stagger is what makes it read as loading, the steps
+   are what make it read as pixels. No filters here - a blur on seventy
+   separate characters is a lot of compositing for a title. */
+.px-word {
+  display: inline-block;
+  white-space: pre;
+}
+
+.px-char {
+  display: inline-block;
+  opacity: 0;
+  animation: px-fill 210ms steps(3, end) both;
+  animation-delay: calc(var(--i) * var(--px-step, 12ms));
+}
+
+@keyframes px-fill {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* --- the shelf ------------------------------------------------------------ */
+
+.tv-stage {
+  position: relative;
+  width: 100%;
+  /* Exactly the set's own height: a 4:3 tube plus its padding and plinth come
+     to 0.86 of the width. Measured, and not a number to trim when this section
+     needs to lose a few pixels - the sets would be cut off. */
+  height: calc(var(--tv-w) * 0.86);
+  perspective: 1400px;
+  perspective-origin: 50% 48%;
+  outline: none;
+  touch-action: pan-y;
+  cursor: grab;
+}
+
+.tv-stage.is-dragging {
+  cursor: grabbing;
+}
+
+.tv-stage:focus-visible {
+  outline: 2px solid #ff0;
+  outline-offset: 4px;
+}
+
+.tv-ring {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.tv-slot {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: var(--tv-w);
+  margin-left: calc(var(--tv-w) / -2);
+  transform-style: preserve-3d;
+  /* Read left to right: step back to the cylinder's axis, turn to this set's
+     angle, then come out along the radius. Written the other way round the two
+     translateZ cancel and every set lands in the same place. `--drag` is the
+     live offset while the shelf is being pulled, in fractions of a step. */
+  transform: translateZ(calc(var(--tv-radius) * -1))
+    rotateY(calc((var(--offset) + var(--drag, 0)) * var(--tv-step)))
+    translateZ(var(--tv-radius));
+  transition: transform var(--tv-move) var(--tv-ease);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  z-index: calc(10 - max(var(--offset), var(--offset) * -1));
+}
+
+/* While the shelf is being dragged it tracks the cursor exactly; a transition
+   here would make it lag behind the hand and feel broken. */
+.is-dragging .tv-slot {
+  transition: none;
+}
+
+/* Beyond the immediate neighbours a set is a sixty-pixel sliver at the edge of
+   the frame: litter rather than depth. `max(n, -n)` is the absolute value of
+   the offset, so this reads 1 for the front set and its two neighbours and 0
+   for everything further out - opacity clamps the rest. The sets stay in the
+   ring and keep turning through it, they are simply not drawn. */
+.tv-slot {
+  opacity: calc(2 - max(var(--offset), var(--offset) * -1));
+  transition:
+    transform var(--tv-move) var(--tv-ease),
+    opacity var(--tv-move) var(--tv-ease);
+}
+
+/* --- the set itself ------------------------------------------------------- */
+
+.tv-set {
+  display: block;
+  border: 2px solid #0ff;
+  background: #000;
+  padding: 7px 7px 0;
+  transition:
+    filter var(--tv-move) var(--tv-ease),
+    border-color var(--tv-move) var(--tv-ease),
+    box-shadow var(--tv-move) var(--tv-ease);
+  /* Off, but still legible. The previous 0.34 buried the neighbours in the
+     background: you could not tell they were televisions, which made the shelf
+     look like clutter instead of a row of sets waiting their turn. */
+  filter: brightness(0.62) saturate(0.55);
+  border-color: #0a5c5c;
+}
+
+.is-on .tv-set {
+  filter: none;
+  border-color: #0ff;
+  /* The glow a lit tube throws onto the case around it. */
+  box-shadow:
+    0 0 0 1px rgba(0, 255, 255, 0.55),
+    0 0 34px 3px rgba(0, 255, 255, 0.25),
+    0 14px 44px rgba(0, 0, 0, 0.8);
+}
+
+.tv-screen {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #05070a;
+}
+
+.tv-screen img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  user-select: none;
+}
+
+/* Scanlines and a curved highlight, painted over whatever the set shows. */
+.tv-screen__glass {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0) 40%),
+    repeating-linear-gradient(rgba(0, 0, 0, 0.28) 0 1px, rgba(0, 0, 0, 0) 1px 3px);
+}
+
+/* The plinth under the tube: standby lamp on the left, badge on the right. */
+.tv-set__base {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 6px 5px 7px;
+}
+
+.tv-set__led {
+  width: 7px;
+  height: 7px;
+  background: #ff3131;
+  flex: none;
+  transition: background var(--tv-move) var(--tv-ease);
+}
+
+.is-on .tv-set__led {
+  background: #00ff00;
+  box-shadow: 0 0 8px #00ff00;
+}
+
+.tv-set__brand {
+  font-family: var(--font-mono);
+  font-size: clamp(8px, 0.85vw, 11px);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #0ff;
+  opacity: 0.75;
+}
+
+/* --- a set with nothing to show ------------------------------------------ */
+
+.tv-testcard {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.tv-testcard__bars {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.tv-testcard__label {
+  font-family: var(--font-mono);
+  font-size: clamp(8px, 1vw, 11px);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  text-align: center;
+  color: #fff;
+  background: #000;
+  padding: 4px 0;
+}
+
+/* --- controls ------------------------------------------------------------- */
+
+.tv-dots {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.tv-dot {
+  width: 1.6rem;
+  height: 0.4rem;
+  background: #0a4a4a;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: background 200ms linear;
+}
+
+.tv-dot:hover {
+  background: #0aa;
+}
+
+.tv-dot.is-on {
+  background: #ff0;
+}
+
+/* --- opening a project ---------------------------------------------------- */
+
+/* The set changing channel into the gallery. Fixed to the viewport and mounted
+   on `document.body`, so it is bound by neither the clipped section it leaves
+   nor the dialog it arrives in. */
+.tv-flight {
+  position: fixed;
+  /* Above the gallery, not below it: the gallery is mounted partway through
+     and has to arrive unseen, behind this. */
+  z-index: 120;
+  pointer-events: none;
+  overflow: hidden;
+  background: #000;
+  border: 2px solid #0ff;
+  animation: tv-flight var(--flight-ms) cubic-bezier(0.5, 0, 0.2, 1) both;
+}
+
+/* Four moves, in the order a television makes them:
+
+   to 22%  the screen collapses into a line where it stands
+   to 54%  the line crosses to where the window will be, and takes its width
+   to 86%  the window opens from the line
+   to 100% it gives way to the real one, already in place behind it
+
+   Run the other way - the ends swapped - this is the project switching off
+   and the portfolio coming back on.
+
+   Only the box is animated - no scaling - so nothing is ever stretched, and
+   because the middle of the journey is a line there is no shape to reconcile
+   between a 4:3 set and a wide panel. */
+@keyframes tv-flight {
+  0% {
+    left: var(--from-x);
+    top: var(--from-y);
+    width: var(--from-w);
+    height: var(--from-h);
+    opacity: 1;
+    box-shadow: 0 0 0 rgba(0, 255, 255, 0);
+  }
+  22% {
+    left: var(--from-x);
+    top: calc(var(--from-y) + var(--from-h) / 2 - 2px);
+    width: var(--from-w);
+    height: 4px;
+    box-shadow: 0 0 26px 3px rgba(0, 255, 255, 0.65);
+  }
+  54% {
+    left: var(--to-x);
+    top: calc(var(--to-y) + var(--to-h) / 2 - 2px);
+    width: var(--to-w);
+    height: 4px;
+    box-shadow: 0 0 34px 4px rgba(0, 255, 255, 0.7);
+  }
+  86% {
+    left: var(--to-x);
+    top: var(--to-y);
+    width: var(--to-w);
+    height: var(--to-h);
+    opacity: 1;
+    box-shadow: 0 0 24px 2px rgba(0, 255, 255, 0.35);
+  }
+  100% {
+    left: var(--to-x);
+    top: var(--to-y);
+    width: var(--to-w);
+    height: var(--to-h);
+    opacity: 0;
+    box-shadow: 0 0 0 rgba(0, 255, 255, 0);
+  }
+}
+
+/* The shelf steps aside while the picture goes. */
+/* The tube goes out at once rather than fading: the moving box starts exactly
+   on top of it, so switching it off is invisible, while fading it would show
+   the real page sitting still underneath the collapse. It stays out for as
+   long as a project has the screen. */
+.crt-tube.is-blank {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tv-slot {
+    transition: none;
+  }
+
+  .tv-flight {
+    display: none;
+  }
+}

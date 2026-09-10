@@ -8,8 +8,10 @@ import {
   FaChevronRight,
   FaDownload,
 } from 'react-icons/fa';
-import { IoClose, IoExpand, IoLockClosed } from 'react-icons/io5';
+import { IoClose, IoLockClosed } from 'react-icons/io5';
 import { projects, type Project, type Gallery } from '../../data/projects';
+import TvCarousel from './TvCarousel';
+import { useChannelChange } from './ChannelChange';
 
 const AUTOPLAY_MS = 5000;
 
@@ -134,71 +136,6 @@ const WindowChrome = ({
   </>
 );
 
-/* ------------------------------------------------------------------ */
-/* Featured card: a browser window showing a single still              */
-/* ------------------------------------------------------------------ */
-
-const FeaturedCard = ({
-  project,
-  index,
-  onExpand,
-}: {
-  project: Project;
-  index: number;
-  onExpand: (project: Project) => void;
-}) => (
-  <motion.article
-    initial={{ opacity: 0, y: 24 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: index * 0.12, duration: 0.55, ease: EASE }}
-    className="group flex flex-col overflow-hidden bg-white border-2 border-gray-800 rounded-lg
-      shadow-[3px_3px_0px_0px_rgba(31,41,55)] sm:shadow-[5px_5px_0px_0px_rgba(31,41,55)]
-      hover:shadow-[5px_5px_0px_0px_rgba(31,41,55)] sm:hover:shadow-[10px_10px_0px_0px_rgba(31,41,55)]
-      hover:-translate-y-0.5 transition-[box-shadow,transform] duration-300 ease-out"
-  >
-    <WindowChrome project={project} />
-
-    {/* The still is the whole affordance: one click opens the gallery. */}
-    <button
-      type="button"
-      onClick={() => onExpand(project)}
-      aria-label={`Open the ${project.name} gallery`}
-      className={`relative w-full aspect-[16/10] overflow-hidden cursor-zoom-in
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-800 focus-visible:ring-inset
-        ${project.gallery?.bg ?? 'bg-gray-100'}`}
-    >
-      {project.gallery && (
-        <img
-          src={project.gallery.images[0]}
-          alt={`${project.name} preview`}
-          loading="lazy"
-          decoding="async"
-          className={`absolute inset-0 w-full h-full transition-transform duration-500
-            ease-out group-hover:scale-[1.03] ${
-              project.gallery.posterFit === 'contain'
-                ? 'object-contain p-4'
-                : 'object-cover object-top'
-            }`}
-        />
-      )}
-
-      {/* Hover reveal on pointer devices; always visible on touch, where the
-          hover state would never fire. */}
-      <span
-        className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5
-          px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider
-          text-white bg-gray-900/85 border border-white/25 rounded
-          opacity-100 translate-y-0
-          sm:opacity-0 sm:translate-y-1
-          sm:group-hover:opacity-100 sm:group-hover:translate-y-0
-          transition-all duration-300 ease-out"
-      >
-        <IoExpand />
-        View gallery
-      </span>
-    </button>
-  </motion.article>
-);
 
 /* ------------------------------------------------------------------ */
 /* Lightbox: carousel on the left, floating description on the right   */
@@ -208,10 +145,15 @@ const Lightbox = ({
   project,
   gallery,
   onDismissed,
+  onCloseStart,
 }: {
   project: Project;
   gallery: Gallery;
   onDismissed: () => void;
+  /* Fired the instant a close is asked for, before this starts fading. The
+     screen behind is dark and empty by then, so something has to be put over
+     the panel at that exact moment or a bare frame shows through. */
+  onCloseStart?: () => void;
 }) => {
   const total = gallery.images.length;
   const { index, direction, setPaused, go, jumpTo, reduceMotion } = useSlides(total);
@@ -223,7 +165,10 @@ const Lightbox = ({
   // transition below is a tween shorter than CLOSE_MS, so it always finishes
   // before the node goes.
   const [closing, setClosing] = useState(false);
-  const requestClose = useCallback(() => setClosing(true), []);
+  const requestClose = useCallback(() => {
+    onCloseStart?.();
+    setClosing(true);
+  }, [onCloseStart]);
   const panelRef = useRef<HTMLDivElement>(null);
 
   // A modal owns the focus while it is open: move focus in, and hand it back to
@@ -495,9 +440,11 @@ const Lightbox = ({
 const LightboxPortal = ({
   project,
   onDismissed,
+  onCloseStart,
 }: {
   project: Project | null;
   onDismissed: () => void;
+  onCloseStart?: () => void;
 }) =>
   createPortal(
     project?.gallery ? (
@@ -506,131 +453,40 @@ const LightboxPortal = ({
         project={project}
         gallery={project.gallery}
         onDismissed={onDismissed}
+        onCloseStart={onCloseStart}
       />
     ) : null,
     document.body,
   );
 
-/* ------------------------------------------------------------------ */
-/* Compact card: no artwork, the name does the work                    */
-/* ------------------------------------------------------------------ */
-
-const CompactCard = ({ project, index }: { project: Project; index: number }) => (
-  <motion.article
-    initial={{ opacity: 0, y: 12 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: 0.2 + index * 0.08, duration: 0.35 }}
-    className="group relative flex flex-col p-4 overflow-hidden rounded-lg
-      bg-gray-900 border-2 border-gray-800
-      shadow-[3px_3px_0px_0px_rgba(31,41,55)] hover:shadow-[5px_5px_0px_0px_rgba(31,41,55)]
-      transition-shadow duration-200"
-  >
-    {/* Grid pattern backdrop */}
-    <div
-      aria-hidden
-      className="absolute inset-0 opacity-[0.07] transition-opacity duration-300 group-hover:opacity-[0.14]"
-      style={{
-        backgroundImage:
-          'linear-gradient(to right, white 1px, transparent 1px), linear-gradient(to bottom, white 1px, transparent 1px)',
-        backgroundSize: '14px 14px',
-      }}
-    />
-
-    <div className="relative flex flex-col h-full">
-      <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-gray-500">
-        {project.category}
-      </span>
-
-      <h2 className="mt-1.5 font-mono text-base font-bold text-white leading-tight">
-        {project.name}
-      </h2>
-
-      <p className="mt-1.5 text-xs text-gray-400 leading-relaxed">{project.tagline}</p>
-
-      <div className="mt-2.5 flex flex-wrap gap-1">
-        {project.stack.slice(0, 3).map((tech) => (
-          <span
-            key={tech}
-            className="px-1.5 py-0.5 text-[10px] font-mono text-gray-300 border border-gray-700 rounded"
-          >
-            {tech}
-          </span>
-        ))}
-      </div>
-
-      <div className="mt-auto pt-3 flex items-center gap-3 text-xs font-bold">
-        <a
-          href={project.repo}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-gray-300 hover:text-white transition-colors"
-        >
-          <FaGithub />
-          Code
-        </a>
-        {project.demo && (
-          <a
-            href={project.demo}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-gray-300 hover:text-white transition-colors"
-          >
-            <FaExternalLinkAlt className="text-[10px]" />
-            Demo
-          </a>
-        )}
-      </div>
-    </div>
-  </motion.article>
-);
 
 /* ------------------------------------------------------------------ */
 
 const Projects = () => {
-  const featured = projects.filter((p) => p.gallery);
-  const compact = projects.filter((p) => !p.gallery);
   const [lightbox, setLightbox] = useState<Project | null>(null);
+  const { toProject, toPortfolio, portal } = useChannelChange();
 
-  const openLightbox = useCallback((project: Project) => setLightbox(project), []);
+  /* The section owns the change because it is the only place that knows about
+     both ends of it: the carousel can say when a project is asked for, but
+     only this knows when the gallery has gone again. */
+  const openLightbox = useCallback(
+    (project: Project) => toProject(() => setLightbox(project)),
+    [toProject],
+  );
+
+  // The box goes over the panel the moment close is asked for; the dialog is
+  // taken away underneath it, unseen.
   const closeLightbox = useCallback(() => setLightbox(null), []);
 
   return (
-    <div className="px-1 py-4">
-      <div className="mb-5 space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Selected Work</h1>
-        <p className="text-sm text-gray-500">
-          Five products across web, backend, mobile and desktop, each built end to end.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {featured.map((project, i) => (
-          <FeaturedCard
-            key={project.name}
-            project={project}
-            index={i}
-            onExpand={openLightbox}
-          />
-        ))}
-      </div>
-
-      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {compact.map((project, i) => (
-          <CompactCard key={project.name} project={project} index={i} />
-        ))}
-      </div>
-
-      <a
-        href="https://github.com/igarridosi"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-5 flex items-center justify-center gap-2 p-3 text-sm font-medium text-gray-700 border-2 border-gray-300 rounded-lg hover:border-gray-800 hover:text-gray-900 transition-colors"
-      >
-        <FaGithub />
-        See all repositories on GitHub →
-      </a>
-
-      <LightboxPortal project={lightbox} onDismissed={closeLightbox} />
+    <div className="px-1 py-2 h-full">
+      <TvCarousel projects={projects} onOpen={openLightbox} />
+      <LightboxPortal
+        project={lightbox}
+        onCloseStart={toPortfolio}
+        onDismissed={closeLightbox}
+      />
+      {portal}
     </div>
   );
 };

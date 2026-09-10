@@ -97,7 +97,7 @@ const AboutMe = () => {
           <MdOutlineTrackChanges className="mt-0.5 text-lg text-gray-700 shrink-0" />
           <p className="text-sm text-gray-700 leading-relaxed">
             <span className="font-bold text-gray-900">
-              I'm looking for my first permanent developer role.
+              I'm open to permanent roles, contract work and freelance projects.
             </span>{' '}
             Available immediately.
           </p>

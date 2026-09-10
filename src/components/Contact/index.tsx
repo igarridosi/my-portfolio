@@ -65,6 +65,14 @@ const Contact = () => {
             from_name: formData.name,
             from_email: formData.email,
             message: formData.message,
+            // The template prints {{time}} under the sender's name. Nothing
+            // was ever sending it, so every message arrived with a blank
+            // there. Formatted here rather than in the template because only
+            // the browser knows the visitor's own timezone.
+            time: new Date().toLocaleString('en-GB', {
+              dateStyle: 'medium',
+              timeStyle: 'short',
+            }),
           },
           { publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY },
         ),
@@ -118,7 +126,7 @@ const Contact = () => {
           Let's Connect
         </motion.h1>
         <p className="text-gray-500 text-sm">
-          Looking for a developer? I'd love to hear about the role.
+          Looking for a developer? I'd love to hear about the work.
         </p>
         <p className="text-xs font-mono text-gray-400">
           Prague · On-site, hybrid, or remote across Europe
