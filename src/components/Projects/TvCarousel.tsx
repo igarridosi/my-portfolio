@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { FaGithub } from 'react-icons/fa';
 import type { Project } from '../../data/projects';
 
 /* ---------------------------------------------------------------------------
@@ -266,10 +267,10 @@ const TvCarousel = ({
             children against each other, and duplicates made it append a fresh
             title on every change instead of replacing the old one. */}
         <h1 key={'name-' + current.name} className="tv-marquee__name">
+          <span className="tv-marquee__page">{FIRST_PAGE + active}</span>
           <span className="tv-marquee__text">
             <PixelText text={current.name} step={26} />
           </span>
-          <span className="tv-marquee__page">{FIRST_PAGE + active}</span>
         </h1>
         <p key={'line-' + current.name} className="tv-marquee__line">
           <PixelText text={current.tagline} step={7} />
@@ -292,7 +293,10 @@ const TvCarousel = ({
             if (offset > count / 2) offset -= count;
             if (offset < -count / 2) offset += count;
             const isOn = i === active;
-            const poster = project.gallery?.images[0];
+            const poster = project.poster ?? project.gallery?.images[0];
+            // Where the set leads once it is tuned in: the gallery if there is
+            // one, otherwise the live site.
+            const link = project.gallery ? undefined : project.demo ?? project.repo;
 
             return (
               <button
@@ -303,14 +307,17 @@ const TvCarousel = ({
                 onClick={() => {
                   // A drag that happens to end on a set is not a click on it.
                   if (movedRef.current) return;
-                  if (isOn) onOpen(project);
-                  else setActive(i);
+                  if (!isOn) setActive(i);
+                  else if (project.gallery) onOpen(project);
+                  else if (link) window.open(link, '_blank', 'noopener,noreferrer');
                 }}
                 aria-label={
                   isOn
                     ? project.gallery
                       ? `Open the ${project.name} gallery`
-                      : project.name
+                      : link
+                        ? `Open ${project.name} in a new tab`
+                        : project.name
                     : `Show ${project.name}`
                 }
                 aria-current={isOn ? 'true' : undefined}
@@ -346,6 +353,21 @@ const TvCarousel = ({
           })}
         </div>
       </div>
+
+      {/* The source, on a bar the width of the set. Every project has one,
+          which is more than can be said for demos and galleries. */}
+      <a
+        key={'repo-' + current.name}
+        className="tv-repo"
+        href={current.repo}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${current.name} source code on GitHub`}
+      >
+        <FaGithub aria-hidden="true" />
+        <span className="tv-repo__label">GitHub</span>
+        <span className="tv-repo__path">{current.repo.split('/').pop()}</span>
+      </a>
 
       {/* The one thing left that says how many there are and where you are. */}
       <div className="tv-dots" role="tablist" aria-label="Choose a project">

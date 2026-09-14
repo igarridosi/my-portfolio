@@ -34,8 +34,13 @@ export interface Project {
   /** Where to get the built app, for projects that ship a binary rather than a URL */
   download?: string;
   /**
-   * Projects with a gallery render as large cards with a quick-look carousel.
-   * Projects without one render in the compact row underneath.
+   * The picture on the set's screen. Falls back to the first gallery slide,
+   * so this is only needed by projects that have a cover but no gallery.
+   */
+  poster?: string;
+  /**
+   * Projects with a gallery open into the lightbox. Projects without one show
+   * their poster on the set and hand the click on to the live demo instead.
    */
   gallery?: Gallery;
 }
@@ -43,9 +48,9 @@ export interface Project {
 export const projects: Project[] = [
   {
     name: 'Huntr',
-    tagline: 'Professional-grade fundamental stock analysis, without the $24k/year terminal.',
+    tagline: 'Fundamental stock analysis that values a company as a range of outcomes, not one number.',
     description:
-      'Serious fundamental analysis sits behind terminals that cost $24k a year, so most retail investors value a company on gut feel. I built a DCF calculator driven by live sliders, backed by Monte Carlo simulations across thousands of scenarios, plus an Opportunity Radar for unusual volume and buyback activity and a visual earnings calendar. The heavy modelling runs in Python and PostgreSQL so the React client stays fast under load. The result: a valuation arrives as a probability range instead of one number, and it runs in production today.',
+      'A fundamental analysis platform for retail investors. It values a company with a DCF calculator driven by live sliders and a Monte Carlo simulation that turns a single target price into a probability range, then finds the next idea through an Opportunity Radar for unusual volume and buybacks, a visual earnings calendar and a portfolio view. React on the front, Python and PostgreSQL behind it, and it runs in production today.',
     stack: ['TypeScript', 'React', 'Python', 'PostgreSQL'],
     category: 'Web',
     repo: 'https://github.com/igarridosi/Huntr',
@@ -95,6 +100,7 @@ export const projects: Project[] = [
     category: 'Web',
     repo: 'https://github.com/igarridosi/Waveter_RadioExplorer',
     demo: 'https://waveter.netlify.app/',
+    poster: '/img/projects/waveter.webp',
   },
   {
     name: 'Open Workout Spots',
@@ -105,6 +111,7 @@ export const projects: Project[] = [
     category: 'Backend',
     repo: 'https://github.com/igarridosi/OWS',
     demo: 'https://openworkoutspots.netlify.app/',
+    poster: '/img/projects/open-workout-spots.webp',
   },
   {
     name: 'The Mole Game',

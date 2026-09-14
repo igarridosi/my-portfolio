@@ -801,9 +801,15 @@ html {
    is why it reads as a shelf rather than as a row of shrinking cards.
    --------------------------------------------------------------------------- */
 .tv-carousel {
-  /* As large as the fixed page height allows. Everything else in this section
-     has been trimmed to the bone to pay for it. */
-  --tv-w: clamp(190px, 31vw, 440px);
+  /* As large as the page allows, in both directions. The width term is the
+     obvious one; the height term is the page's own fixed height (the
+     `.content-height` formula, less its padding) with everything that is not
+     the shelf taken off - title block, source bar, dots and the gaps between
+     them come to about 250px - divided by the set's height-to-width ratio.
+     Without it the stage, being a flex item, was quietly squeezed to fit and
+     the sets spilled out of it over the bar below. */
+  --tv-room: calc(max(clamp(300px, 100vh - 330px, 780px), 32.6vh + 268px) - 290px);
+  --tv-w: clamp(190px, min(31vw, var(--tv-room) / 0.835), 440px);
   --tv-step: 30deg;
   /* The distance between two sets is the chord 2R*sin(step/2), which at this
      radius is about 1.19 of a set: a fifth of a set of clear air between each
@@ -832,9 +838,13 @@ html {
 
 /* --- the title above the shelf ------------------------------------------- */
 
-/* The title block stands apart from the shelf rather than crowding it: the
-   gap above comes from the carousel's own spacing, and this adds the rest. */
+/* The title block is a box of fixed height, whatever it holds. It is remounted
+   on every change, and while one tagline ran to two lines and the next to
+   one, the shelf below it moved by half a line each time the set changed -
+   a step in the middle of the turn. Room for the longest case is reserved
+   here instead, so the shelf never learns what the title says. */
 .tv-marquee {
+  flex: none;
   text-align: center;
   max-width: 62ch;
   padding: 0 1rem;
@@ -848,17 +858,21 @@ html {
   text-transform: uppercase;
   color: #0ff;
   display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 0.5em;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3em;
+  white-space: nowrap;
 }
 
 .tv-marquee__text {
   display: inline-block;
+  height: 1.05em;
 }
 
+/* The page number sits over the title, as the number sat over a page. */
 .tv-marquee__page {
   font-size: 0.42em;
+  line-height: 1;
   color: #ff0;
   font-variant-numeric: tabular-nums;
 }
@@ -866,6 +880,8 @@ html {
 .tv-marquee__line {
   font-size: clamp(0.7rem, 1.05vw, 0.85rem);
   line-height: 1.5;
+  /* Two lines, always, whether the tagline needs them or not. */
+  min-height: 3em;
   color: #fff;
   opacity: 0.78;
   margin-top: 0.5rem;
@@ -902,9 +918,11 @@ html {
   position: relative;
   width: 100%;
   /* Exactly the set's own height: a 4:3 tube plus its padding and plinth come
-     to 0.86 of the width. Measured, and not a number to trim when this section
-     needs to lose a few pixels - the sets would be cut off. */
-  height: calc(var(--tv-w) * 0.86);
+     to 0.835 of the width. Measured, and not a number to trim when this section
+     needs to lose a few pixels - the sets would be cut off. Nor may flex trim
+     it: the sets are positioned absolutely and would simply hang out. */
+  height: calc(var(--tv-w) * 0.835);
+  flex: none;
   perspective: 1400px;
   perspective-origin: 50% 48%;
   outline: none;
@@ -1075,6 +1093,66 @@ html {
   color: #fff;
   background: #000;
   padding: 4px 0;
+}
+
+/* --- the source, under the shelf ----------------------------------------- */
+
+/* A bar as wide as the set above it: the one control on the page, styled as
+   a fastext key rather than a web button. */
+.tv-repo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6em;
+  width: var(--tv-w);
+  max-width: 100%;
+  /* Measured so that the repo path can be dropped when the bar is too narrow
+     to hold it, rather than shown cut off. */
+  container-type: inline-size;
+  padding: 0.5em 1em;
+  font-family: var(--font-mono);
+  font-size: clamp(0.66rem, 0.95vw, 0.8rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #0ff;
+  background: #000;
+  border: 2px solid #0ff;
+  text-decoration: none;
+  transition:
+    background 120ms linear,
+    color 120ms linear;
+}
+
+/* Pressed, it goes yellow on black: the fastext convention for the key you
+   are on. Cyan on cyan-black left the text swimming in the same colour. */
+.tv-repo:hover,
+.tv-repo:focus-visible {
+  background: #ff0;
+  border-color: #ff0;
+  color: #000;
+  outline: none;
+}
+
+.tv-repo:hover .tv-repo__path,
+.tv-repo:focus-visible .tv-repo__path {
+  opacity: 1;
+}
+
+.tv-repo__label {
+  font-weight: 700;
+}
+
+.tv-repo__path {
+  opacity: 0.7;
+  text-transform: none;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+@container (max-width: 380px) {
+  .tv-repo__path {
+    display: none;
+  }
 }
 
 /* --- controls ------------------------------------------------------------- */
