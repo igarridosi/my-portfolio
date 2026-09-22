@@ -1,4 +1,8 @@
-exports.handler = async function () {
+/* The project declares `"type": "module"`, so every .js file in the repo is
+   an ES module - Netlify's bundler refuses this file outright if it is
+   written as CommonJS. ESM it is: `export const handler`, and `process` and
+   `fetch` come from the Node globals the function runtime provides. */
+export const handler = async function () {
   const token = process.env.GITHUB_TOKEN;
 
   if (!token) {
@@ -71,6 +75,9 @@ exports.handler = async function () {
       body: JSON.stringify(repos),
     };
   } catch (error) {
+    // The caller gets nothing useful out of a token or a rate-limit message,
+    // but the build log is where this is actually diagnosed from.
+    console.error('github-repos:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: 'Failed to fetch repositories' }),

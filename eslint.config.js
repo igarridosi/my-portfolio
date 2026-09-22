@@ -30,4 +30,12 @@ export default [
       ],
     },
   },
+  // Netlify functions run on Node, not in the browser: `process` and the
+  // rest are globals there. Without this they lint as undefined variables.
+  {
+    files: ['netlify/functions/**/*.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 ]
