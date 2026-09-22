@@ -268,7 +268,7 @@ const Lightbox = ({
         variants={panelVariants}
         transition={panelTransition}
         onClick={(e) => e.stopPropagation()}
-        className="tt-screen crt-screen crt-lines relative w-full max-w-[96vw] max-h-full overflow-hidden border-2 sm:border-[3px] border-gray-800 rounded-lg sm:rounded-xl"
+        className="tt-screen crt-screen relative w-full max-w-[96vw] max-h-full overflow-hidden border-2 sm:border-[3px] border-gray-800 rounded-lg sm:rounded-xl"
       >
         <WindowChrome project={project} onClose={requestClose} />
 
@@ -428,6 +428,10 @@ const Lightbox = ({
             <IoClose />
           </button>
         </div>
+
+        {/* The same tube the window has: this panel covers it, so without
+            this it would be the one surface on the site that is an LCD. */}
+        <span className="crt-face" aria-hidden="true" />
       </motion.div>
     </motion.div>
   );

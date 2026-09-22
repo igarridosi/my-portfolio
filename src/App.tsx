@@ -272,6 +272,9 @@ function AppLayout() {
             <TeletextFooter />
           </div>
           </div>
+
+          {/* The tube's texture and colour, over everything the window holds. */}
+          <div className="crt-face" aria-hidden="true" />
         </div>
       </motion.div>
 
