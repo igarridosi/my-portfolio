@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import emailjs from '@emailjs/browser';
-import { MdEmail, MdPerson, MdMessage } from 'react-icons/md';
+import { MdEmail, MdPerson, MdMessage, MdPhone } from 'react-icons/md';
 import { BiSend } from 'react-icons/bi';
 import { FaLinkedinIn, FaGithub } from 'react-icons/fa';
 
@@ -10,6 +10,12 @@ const DIRECT_LINKS = [
     icon: <MdEmail className="text-xl" />,
     label: 'Gmail',
     href: 'mailto:garridotab4@gmail.com',
+  },
+  {
+    icon: <MdPhone className="text-xl" />,
+    // The number itself, not "Phone": a recruiter wants it in front of them.
+    label: '+420 777 935 630',
+    href: 'tel:+420777935630',
   },
   {
     icon: <FaLinkedinIn className="text-lg" />,
@@ -129,7 +135,7 @@ const Contact = () => {
           Looking for a developer? I'd love to hear about the work.
         </p>
         <p className="text-xs font-mono text-gray-400">
-          Prague · On-site, hybrid, or remote across Europe
+          Prague · On-site, hybrid, or remote across Europe · EU citizen, no visa required
         </p>
       </div>
 

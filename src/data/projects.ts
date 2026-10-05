@@ -50,8 +50,8 @@ export const projects: Project[] = [
     name: 'Huntr',
     tagline: 'Fundamental stock analysis that values a company as a range of outcomes, not one number.',
     description:
-      'A fundamental analysis platform for retail investors. It values a company with a DCF calculator driven by live sliders and a Monte Carlo simulation that turns a single target price into a probability range, then finds the next idea through an Opportunity Radar for unusual volume and buybacks, a visual earnings calendar and a portfolio view. React on the front, Python and PostgreSQL behind it, and it runs in production today.',
-    stack: ['TypeScript', 'React', 'Python', 'PostgreSQL'],
+      'A research terminal for individual investors: financial statements, earnings history and call transcripts, a screener across 800+ tickers, and portfolio tracking with time-weighted return measured against the S&P 500. Its valuation suite (DCF scenarios, Monte Carlo, reverse DCF) traces every input back to the SEC filing it came from, and refuses to show a figure when the data does not reconcile. Behind it, a nightly serverless pipeline on Azure Functions loads SEC EDGAR data for 890+ companies into PostgreSQL, provisioned with Terraform and deployed through GitHub Actions with no stored credentials.',
+    stack: ['TypeScript', 'React', 'Next.js', 'Supabase (PostgreSQL)', 'Azure Functions', 'Terraform'],
     category: 'Web',
     repo: 'https://github.com/igarridosi/Huntr',
     demo: 'https://www.huntrvalue.me/',
@@ -74,8 +74,8 @@ export const projects: Project[] = [
     name: 'Oroi',
     tagline: 'A subscription tracker that makes you type every expense, on purpose.',
     description:
-      'Subscription trackers automate everything, and the moment you stop typing your expenses you stop noticing them. So this native Android app, built in Kotlin and Jetpack Compose, deliberately has no bank sync: entering each expense by hand is the friction that makes it register. The outcome is awareness rather than automation, and it ships publicly on Appteka. Named after the Basque word "oroitu", to remember.',
-    stack: ['Kotlin', 'Jetpack Compose', 'Android SDK'],
+      'Subscription trackers automate everything, and the moment you stop typing your expenses you stop noticing them, so entry here is manual by design. Fully offline: data stays on the device in Room, with no account, no analytics and no internet permission. Renewal reminders arrive through WorkManager two days before each charge, alongside a home-screen widget, a monthly budget with live progress, CSV export and a custom animated donut chart drawn on the Compose Canvas. Material 3 light and dark themes, localised into English, Spanish and Basque. Named after the Basque word "oroitu", to remember.',
+    stack: ['Kotlin', 'Jetpack Compose', 'Material 3', 'Room', 'WorkManager', 'Android SDK'],
     category: 'Mobile',
     repo: 'https://github.com/igarridosi/OroiApp',
     download: 'https://appteka.store/app/811r289712',

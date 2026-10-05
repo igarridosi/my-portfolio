@@ -1,16 +1,19 @@
 import { motion } from 'framer-motion';
-import { FaReact, FaGithub, FaPython } from 'react-icons/fa';
+import { FaReact, FaGithub } from 'react-icons/fa';
 import { PiFileCSharp } from 'react-icons/pi';
+import { VscAzure } from 'react-icons/vsc';
 import {
   MdOutlineSpeed, MdOutlineLayers, MdOutlinePublic, MdOutlineAutoAwesome,
   MdOutlineLocationOn, MdOutlineSchool, MdOutlineWorkOutline, MdOutlineFlag,
-  MdOutlineTrackChanges,
+  MdOutlineTrackChanges, MdOutlineBadge, MdOutlineTranslate,
 } from 'react-icons/md';
 
+/* In the order the CV now leads with: the web first, the desktop and hardware
+   background second, and the cloud the products run on. */
 const stack = [
-  { icon: <PiFileCSharp className="text-xl" />, label: 'C# / .NET', sub: 'WPF desktop & backend' },
-  { icon: <FaReact className="text-xl" />, label: 'React / TS', sub: 'Web' },
-  { icon: <FaPython className="text-xl" />, label: 'Python', sub: 'Data & IoT' },
+  { icon: <FaReact className="text-xl" />, label: 'React / TS', sub: 'Web & Next.js' },
+  { icon: <PiFileCSharp className="text-xl" />, label: 'C# / .NET', sub: 'Desktop & hardware' },
+  { icon: <VscAzure className="text-xl" />, label: 'Azure', sub: 'Serverless & Terraform' },
 ];
 
 /* The quick facts a recruiter scans for before reading a single sentence. */
@@ -28,18 +31,27 @@ const facts = [
     label: 'Experience',
     value: 'Production work at Irisbond (ES) and SmartEnds (BE)',
   },
+  /* The question every Prague recruiter has to ask a foreign applicant,
+     answered before they have to. */
+  { icon: <MdOutlineBadge />, label: 'Work permit', value: 'EU citizen, no visa required' },
+  {
+    icon: <MdOutlineTranslate />,
+    label: 'Languages',
+    value: 'Spanish & Basque (native), English (C1)',
+    note: 'Learning Czech, A1',
+  },
 ];
 
 const values = [
   {
     icon: <MdOutlineLayers className="text-2xl" />,
     title: 'I work on the whole stack, not just the interface',
-    text: "At SMARTENDS I wrote the Python services that processed high-frequency sensor data. At IRISBOND I worked at the threading level in C#. In my own projects I design the database, the API and the client, so I can take a feature from the data model to the finished screen.",
+    text: "At SMARTENDS I wrote the Python services that processed high-frequency sensor data. At IRISBOND I worked at the threading level in C#. In my own projects I design the database, the API, the client and the infrastructure it runs on, so I can take a feature from the data model to the finished screen.",
   },
   {
     icon: <MdOutlineSpeed className="text-2xl" />,
     title: 'I treat performance as a feature',
-    text: "My internship work was measured in latency, not tickets closed: keeping a Windows UI thread unblocked during eye-tracking calibration, cutting processing time on a real-time monitoring platform. I profile before I optimise, and I know the difference between slow code and a slow design.",
+    text: "My internship work was measured in frames and latency, not tickets closed: moving rendering off the UI thread of an eye-tracking calibration app tripled its frame rate from 30 to 90 FPS, and I cut processing time on a real-time monitoring platform. I profile before I optimise, and I know the difference between slow code and a slow design.",
   },
   {
     icon: <MdOutlinePublic className="text-2xl" />,
@@ -74,10 +86,9 @@ const AboutMe = () => {
           <span className="font-bold">I work at both ends.</span>
         </p>
         <p className="text-gray-600 leading-relaxed">
-          I'm a Full Stack Developer based in Prague who works at both ends of the stack:
-          multithreaded C# and WPF desktop software that talks directly to hardware, and
-          React/TypeScript interfaces that stay fast under heavy data loads. Two internships,
-          one in Spain and one in Belgium, plus{' '}
+          I'm a Full Stack Developer based in Prague, working mainly in React and TypeScript,
+          with a background in multithreaded C#/.NET desktop software that talks directly to
+          hardware. I build and ship my own products end to end:{' '}
           <a
             href="https://www.huntrvalue.me/"
             target="_blank"
@@ -86,8 +97,10 @@ const AboutMe = () => {
           >
             Huntr
           </a>
-          , a financial analytics platform of my own running in production. Along the way I learned that most performance problems are
-          design problems wearing a disguise.
+          , a data-heavy research platform backed by a serverless Azure data pipeline, and
+          Oroi, a native Android app, both maintained by me. Two internships, one in Spain and
+          one in Belgium. Along the way I learned that most performance problems are design
+          problems wearing a disguise.
         </p>
       </motion.div>
 

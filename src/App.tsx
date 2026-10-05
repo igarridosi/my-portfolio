@@ -143,6 +143,10 @@ function AppLayout() {
   // acknowledging the navigation - while everything inside the screen waits.
   const displayUrl = `https://ibaigarrido.dev${location.pathname}`;
   const isHome = displayed.pathname === '/';
+  // Prose pages keep a reading measure. The skills index is not prose - it is
+  // columns of short names - and every pixel of width it gets back is a name
+  // that no longer wraps, which is what lets its type be set larger.
+  const isWide = displayed.pathname === '/skills';
 
   return (
     <motion.div
@@ -241,7 +245,7 @@ function AppLayout() {
                 <main
                   id="main"
                   className={`w-full overflow-y-auto p-2 sm:p-6 md:px-8 rounded-xl no-scrollbar content-height ${
-                    isHome ? 'max-w-[800px]' : 'max-w-[1100px]'
+                    isHome ? 'max-w-[800px]' : isWide ? 'max-w-[1440px]' : 'max-w-[1100px]'
                   }`}
                 >
                   <Routes location={displayed}>

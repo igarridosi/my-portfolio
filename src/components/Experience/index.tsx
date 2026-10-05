@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { MdWorkOutline, MdSchool, MdLocationOn } from 'react-icons/md';
-import { roles, education } from '../../data/experience';
+import { MdWorkOutline, MdSchool, MdLocationOn, MdVerified } from 'react-icons/md';
+import { FaLinkedinIn, FaQuoteLeft } from 'react-icons/fa';
+import { roles, education, recommendation } from '../../data/experience';
 
 const fadeUp = (delay: number) => ({
   initial: { opacity: 0, y: 16 },
@@ -21,6 +22,57 @@ const Experience = () => (
         Two internships across two countries, shipping production software rather than coursework.
       </p>
     </div>
+
+    {/* The recommendation goes first. Anyone can write their own bullet
+        points; this is the one paragraph on the page written by somebody
+        else - the CTO who supervised the work - and it links straight to
+        the original so it can be checked rather than taken on trust. */}
+    <motion.figure
+      {...fadeUp(0.05)}
+      className="relative p-4 sm:p-5 border-2 border-gray-800 rounded-lg"
+    >
+      <p className="flex items-center gap-2 text-xs uppercase tracking-widest font-mono text-gray-400">
+        <MdVerified className="text-base" />
+        Recommendation
+      </p>
+
+      <blockquote className="mt-3">
+        <p className="flex gap-3 text-base sm:text-lg font-bold leading-snug text-gray-900">
+          <FaQuoteLeft aria-hidden="true" className="mt-1 shrink-0 text-sm text-gray-700" />
+          <span>{recommendation.pullQuote}</span>
+        </p>
+
+        <div className="mt-3 space-y-2 sm:pl-7">
+          {recommendation.paragraphs.map((paragraph) => (
+            <p key={paragraph} className="text-sm text-gray-600 leading-relaxed">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      </blockquote>
+
+      <figcaption className="mt-4 sm:pl-7 flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
+        <div>
+          <p className="text-sm font-bold text-gray-900">{recommendation.author}</p>
+          <p className="text-xs text-gray-600">
+            {recommendation.role} · {recommendation.relation}
+          </p>
+          <p className="mt-0.5 text-[11px] font-mono text-gray-500">
+            {recommendation.date} · Translated from {recommendation.originalLanguage}
+          </p>
+        </div>
+
+        <a
+          href={recommendation.source}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-800 border-2 border-gray-800 rounded hover:bg-gray-800 hover:text-white transition-colors"
+        >
+          <FaLinkedinIn aria-hidden="true" />
+          Verify on LinkedIn
+        </a>
+      </figcaption>
+    </motion.figure>
 
     {/* Professional experience */}
     <section className="space-y-3">
@@ -106,6 +158,7 @@ const Experience = () => (
             <h2 className="mt-2 text-sm font-bold text-gray-900 leading-snug">{item.title}</h2>
             <p className="mt-1 text-xs text-gray-600">{item.school}</p>
             <p className="text-xs text-gray-500">{item.location}</p>
+            <p className="mt-2 text-xs text-gray-600 leading-relaxed">{item.detail}</p>
           </motion.div>
         ))}
       </div>
@@ -119,6 +172,9 @@ const Experience = () => (
       <p className="text-xs uppercase tracking-widest font-mono text-gray-400">Currently</p>
       <p className="mt-1.5 text-sm font-bold text-white">
         Based in Prague, open to on-site and hybrid roles here, or remote anywhere in Europe.
+      </p>
+      <p className="mt-1 text-sm text-gray-300">
+        EU citizen, no visa required. Available immediately.
       </p>
       <a
         href="/cv/Ibai_Garrido_CV.pdf"

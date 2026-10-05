@@ -99,7 +99,7 @@ const Section1 = () => {
         {/* Professional tagline */}
         <div className="hero-gap-md space-y-2">
           <p className="text-sm sm:text-base lg:text-lg text-gray-700 font-medium">
-            High-concurrency desktop apps and data-heavy web platforms. Fast on both.
+            Data-heavy web platforms and high-concurrency desktop apps. Fast on both.
           </p>
           <p className="text-xs sm:text-sm font-mono text-gray-400 flex items-center gap-2 flex-wrap">
             <FaMapMarkerAlt className="text-gray-400" />
