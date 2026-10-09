@@ -1448,3 +1448,116 @@ html {
   width: 1.2em;
   font-size: 1.05em;
 }
+
+/* --- the invitation to exe.ibaigarrido.dev --------------------------------- */
+
+/* The <dialog> is only a frame for the panel inside it: no padding, so a click
+   on the element itself can only be a click on the backdrop; no border or
+   ground of its own, so what shows is the panel, drawn like every other window
+   on the site. */
+.exe-popup {
+  /* A modal <dialog> centres itself with auto margins, and Tailwind's reset
+     sets every margin to zero - without this it opens in the top-left
+     corner. */
+  margin: auto;
+  width: min(92vw, 34rem);
+  max-width: none;
+  max-height: calc(100dvh - 2rem);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  overflow: visible;
+}
+
+.exe-popup::backdrop {
+  background: rgba(0, 0, 0, 0.72);
+}
+
+/* Switched on like a set rather than faded in: the picture opens from a line,
+   the same move the site makes when it changes channel. */
+.exe-popup[open] {
+  animation: exe-popup-on 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.exe-popup[open]::backdrop {
+  animation: exe-popup-dim 320ms ease-out;
+}
+
+@keyframes exe-popup-on {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.02);
+  }
+  40% {
+    opacity: 1;
+    transform: scaleY(0.02);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes exe-popup-dim {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The two buttons are the site's own: the yellow of the fastext key you are on
+   - the active tab in the index row - for the one that goes somewhere, and the
+   cyan outline of the address-bar buttons for the one that only closes. */
+.exe-popup__primary,
+.exe-popup__secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.6rem 1rem;
+  border: 2px solid;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-decoration: none;
+  transition:
+    background-color 120ms linear,
+    color 120ms linear,
+    border-color 120ms linear;
+}
+
+.exe-popup__primary {
+  color: #000;
+  background: #ff0;
+  border-color: #ff0;
+}
+
+.exe-popup__primary:hover {
+  background: #0ff;
+  border-color: #0ff;
+}
+
+.exe-popup__secondary {
+  color: #0ff;
+  background: #000;
+  border-color: #0ff;
+}
+
+.exe-popup__secondary:hover {
+  color: #000;
+  background: #0ff;
+}
+
+.exe-popup__primary:focus-visible,
+.exe-popup__secondary:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exe-popup[open],
+  .exe-popup[open]::backdrop {
+    animation: none;
+  }
+}

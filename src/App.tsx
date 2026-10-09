@@ -16,6 +16,7 @@ import {
 } from './components/Teletext/TeletextBars';
 import { PageWipe, usePageWipe } from './components/Teletext/PageWipe';
 import Contact from './components/Contact';
+import ExePopup from './components/ExePopup';
 
 /* Spacing of the grid the trail snaps to, and the size of the block drawn on
    it - they are the same number on purpose. A block smaller than its cell
@@ -282,6 +283,7 @@ function AppLayout() {
         </div>
       </motion.div>
 
+      <ExePopup />
     </motion.div>
   );
 }
