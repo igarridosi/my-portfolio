@@ -181,6 +181,10 @@ function AppLayout() {
       >
         {/* Retro browser window */}
         <div className="crt-screen relative my-auto w-full sm:w-[90%] lg:w-[80%] max-w-[1700px] overflow-hidden border-2 sm:border-3 border-gray-800 bg-[#0c0d10] rounded-lg sm:rounded-xl">
+          {/* The way to the other portfolio: a tab against the inside of the
+              window's right-hand edge, in the same place on every page. */}
+          <ExeTrigger />
+
 
           {/* Traffic lights bar */}
           <div className="flex items-center h-9 sm:h-11 bg-black border-b-2 border-tt-cyan px-3 sm:px-5">
@@ -193,11 +197,6 @@ function AppLayout() {
             <span className="ml-3 sm:ml-4 font-mono text-[10px] sm:text-xs uppercase tracking-[0.2em] text-tt-cyan">
               Ibai Garrido
             </span>
-            {/* The way to the other portfolio: part of the window, in the
-                same corner on every page. */}
-            <div className="ml-auto">
-              <ExeTrigger />
-            </div>
           </div>
 
           {/* Address bar */}
@@ -268,8 +267,10 @@ function AppLayout() {
               </motion.div>
 
               {isHome && (
+                // The right-hand padding keeps the portrait clear of the
+                // honest.exe tab on the window's edge.
                 <motion.div
-                  className="flex justify-center"
+                  className="flex justify-center lg:pr-4"
                   initial={{ x: 50, opacity: 0 }}
                   animate={{ x: 0, opacity: 1 }}
                   transition={{ delay: 0.6, duration: 0.5 }}

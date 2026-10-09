@@ -1451,46 +1451,103 @@ html {
 
 /* --- exe.ibaigarrido.dev: the tab, the card and the way out -------------- */
 
-/* The trigger, at the right-hand end of the window's title bar. A fastext key:
-   yellow on black at rest, the colours swapped when it is pressed or the card
-   is out. Set larger and bolder than the bar's own label so it reads at a
-   glance through the scanlines. */
+/* The trigger: a tab against the inside of the window's right-hand edge.
+   Part of it runs on under the frame - the window's overflow cuts it off - so
+   it reads as something filed in the side of the set rather than a button
+   asking to be pressed. Pointing at it or tabbing to it brings it the rest of
+   the way out; the hidden part is padding, so the label is never cut.
+
+   On a desktop the window is a box of fixed height, so the tab is anchored to
+   the window. Below that the window grows with its content and the page
+   scrolls, and a tab anchored to the window would scroll away with it - so
+   there it is pinned to the screen instead, just inside the window's edge.
+   The offset is the window's own: the page padding, its share of the side
+   margin above 640px, and its border. */
 .exe-trigger {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5em;
-  padding: 0.3rem 0.7rem;
-  border: 2px solid #ff0;
+  --exe-tab-right: calc(0.5rem + 2px);
+  position: fixed;
+  right: var(--exe-tab-right);
+  bottom: 22vh;
+  z-index: 10;
+  padding: 0.95rem 0.5rem;
+  writing-mode: vertical-rl;
   background: #000;
+  border: 2px solid #ff0;
+  border-right: 0;
   color: #ff0;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   line-height: 1;
   cursor: pointer;
   transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
     background-color 120ms linear,
     color 120ms linear;
 }
 
 @media (min-width: 640px) {
   .exe-trigger {
+    --exe-tab-right: calc(0.75rem + (100vw - 1.5rem) * 0.05 + 3px);
+  }
+}
+
+@media (min-width: 1024px) {
+  .exe-trigger {
+    position: absolute;
+    right: 0;
+    bottom: 24%;
+    padding-right: 1.1rem;
     font-size: 13px;
-    padding: 0.35rem 0.85rem;
+    transform: translateX(0.6rem);
   }
 }
 
 .exe-trigger:hover,
+.exe-trigger:focus-visible,
 .exe-trigger[aria-expanded="true"] {
+  transform: translateX(0);
   background: #ff0;
   color: #000;
+  outline: none;
 }
 
-.exe-trigger:focus-visible {
-  outline: 2px solid #fff;
-  outline-offset: 2px;
+/* The tab belongs to the picture, so it goes when the picture goes. The
+   shutters of a page change stop exactly at the inside of the frame, where
+   the tab is cut off, and the anti-aliased last column of the shutter let
+   the tab's yellow top and bottom edges show through as two specks of light
+   on a closed screen. Rather than chase a pixel, the tab steps out while the
+   screen is closed: gone as the shutters meet (1180ms into the 2500ms page
+   change, PageWipe's CLOSE_AT), back as they open again. */
+.crt-screen:has(.tt-wipe) .exe-trigger {
+  animation: exe-trigger-wipe 2500ms linear both;
+}
+
+@keyframes exe-trigger-wipe {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  90% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Likewise when a project takes over the screen and the tube is switched
+   off: the tab goes dark with it and comes back when the tube does. */
+.exe-trigger {
+  transition-property: transform, background-color, color, opacity;
+}
+
+.crt-screen:has(.crt-tube.is-blank) .exe-trigger {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* The tube's lines over a small panel of text: the same lines as the window,
