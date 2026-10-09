@@ -1,19 +1,34 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+  type RefObject,
+} from 'react';
 import { createPortal } from 'react-dom';
 
 /* ---------------------------------------------------------------------------
    The way to the other portfolio, exe.ibaigarrido.dev.
 
-   Two states of one thing. Most of the time it is a narrow tab tucked against
-   the right-hand edge of the screen: always there, never in the way. Once per
-   visit - after eight seconds, or once the visitor has read 40% of the page -
-   it slides out of that edge into a card in the bottom-right corner, and
-   closing the card slides it back into the tab.
+   Two parts sharing one state. The trigger is a key in the window's own title
+   bar, top right - part of the window, in the same place on every page. The
+   card is a non-modal <dialog> in the bottom-right corner of the screen. Once
+   per visit - after eight seconds, or once the visitor has read 40% of the
+   page - the card comes out by itself; after that it is the trigger's.
 
-   The card is a non-modal <dialog>. It sits in a corner and the page around
-   it stays usable, so it does not take focus when it appears by itself:
-   someone typing into the contact form would otherwise have their keystrokes
-   land in it. It does take focus when the visitor asks for it from the tab.
+   They are split because they live in different places: the trigger inside
+   the window's markup, the card at the root where it can sit above every CRT
+   layer. ExeProvider wraps the app and owns the card; ExeTrigger is dropped
+   into the title bar and reads the state from it.
+
+   The card sits in a corner and the page around it stays usable, so it does
+   not take focus when it appears by itself: someone typing into the contact
+   form would otherwise have their keystrokes land in it. It does take focus
+   when the visitor asks for it with the trigger.
 
    Following the link does not cut to the new site. The set is switched off -
    the picture closes to a line, the line to a dot, the dot fades - and the
@@ -25,7 +40,7 @@ const DELAY_MS = 8000;
 const SCROLL_FRACTION = 0.4;
 /** How long to wait before trying again when something else has the screen. */
 const BUSY_RETRY_MS = 1500;
-/** Must match the slide back into the tab in index.css. */
+/** Must match the slide out of the corner in index.css. */
 const COLLAPSE_MS = 280;
 /** From the first frame of the switch-off to the browser leaving. Long enough
     to read as a set being turned off and retuned, not as a page being cut. */
@@ -66,6 +81,14 @@ const preconnect = () => {
   document.head.appendChild(link);
 };
 
+interface ExeState {
+  open: boolean;
+  toggle: () => void;
+  triggerRef: RefObject<HTMLButtonElement | null>;
+}
+
+const ExeContext = createContext<ExeState | null>(null);
+
 /** The set switching off and the other channel being tuned in. Above
     everything, and it takes every click, so nothing can be started halfway. */
 const TuneOut = () =>
@@ -84,9 +107,10 @@ const TuneOut = () =>
     document.body,
   );
 
-const ExePopup = () => {
+/** Owns the card and its state. Wraps the app so the trigger can reach it. */
+export const ExeProvider = ({ children }: { children: ReactNode }) => {
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const tabRef = useRef<HTMLButtonElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const primaryRef = useRef<HTMLAnchorElement>(null);
 
   const [open, setOpen] = useState(false);
@@ -99,7 +123,7 @@ const ExePopup = () => {
   /** Where focus goes when the state changes - set before, acted on after
       the render that shows the element it is meant for. */
   const focusPrimary = useRef(false);
-  const focusTab = useRef(false);
+  const focusTrigger = useRef(false);
 
   const expand = useCallback((byVisitor: boolean) => {
     const dialog = dialogRef.current;
@@ -130,7 +154,7 @@ const ExePopup = () => {
     const dialog = dialogRef.current;
     if (!dialog?.open) return;
     autoSpent.current = true;
-    focusTab.current = dialog.contains(document.activeElement);
+    focusTrigger.current = dialog.contains(document.activeElement);
 
     const finish = () => {
       dialog.close();
@@ -145,20 +169,25 @@ const ExePopup = () => {
     window.setTimeout(finish, COLLAPSE_MS);
   }, []);
 
+  const toggle = useCallback(() => {
+    if (dialogRef.current?.open) collapse();
+    else expand(true);
+  }, [collapse, expand]);
+
   // Focus follows the visitor, never the timer.
   useEffect(() => {
     if (open && focusPrimary.current) {
       focusPrimary.current = false;
       primaryRef.current?.focus();
     }
-    if (!open && focusTab.current) {
-      focusTab.current = false;
-      tabRef.current?.focus();
+    if (!open && focusTrigger.current) {
+      focusTrigger.current = false;
+      triggerRef.current?.focus();
     }
   }, [open]);
 
-  // Out of the tab by itself: after the wait or the scroll, whichever is
-  // first, and only when nothing else has the screen.
+  // Out by itself: after the wait or the scroll, whichever is first, and only
+  // when nothing else has the screen.
   useEffect(() => {
     if (new URLSearchParams(window.location.search).has('nopopup')) return;
 
@@ -198,8 +227,9 @@ const ExePopup = () => {
     return stop;
   }, [expand]);
 
-  // Back into the tab with Escape or a click anywhere else. Escape is left
-  // alone while the project viewer is open: that one is its.
+  // Away with Escape or a click anywhere else. Escape is left alone while the
+  // project viewer is open: that one is its. The trigger is not "anywhere
+  // else" - it toggles, and closing here first would reopen it straight away.
   useEffect(() => {
     if (!open || closing) return;
 
@@ -209,7 +239,7 @@ const ExePopup = () => {
     };
     const onPointer = (e: PointerEvent) => {
       const target = e.target as Node;
-      if (dialogRef.current?.contains(target) || tabRef.current?.contains(target)) return;
+      if (dialogRef.current?.contains(target) || triggerRef.current?.contains(target)) return;
       collapse();
     };
 
@@ -244,19 +274,11 @@ const ExePopup = () => {
     );
   };
 
+  const state = useMemo(() => ({ open, toggle, triggerRef }), [open, toggle]);
+
   return (
-    <>
-      <button
-        ref={tabRef}
-        type="button"
-        className="exe-tab"
-        hidden={open}
-        aria-expanded={open}
-        aria-controls="exe-popup"
-        onClick={() => expand(true)}
-      >
-        honest.exe
-      </button>
+    <ExeContext.Provider value={state}>
+      {children}
 
       <dialog
         ref={dialogRef}
@@ -265,31 +287,37 @@ const ExePopup = () => {
         aria-labelledby="exe-popup-title"
         aria-describedby="exe-popup-body"
       >
-        <div className="tt-screen crt-screen relative overflow-hidden border-2 border-tt-cyan">
+        {/* No barrel edge or gloom here: on a panel this small they darken
+            the very corners the text sits in. The tube's lines stay, at half
+            strength, so it still belongs to the same set. */}
+        <div className="tt-screen relative isolate overflow-hidden border-2 border-tt-cyan">
           {/* The same title bar as every other window on the site. */}
-          <div className="flex items-center gap-3 h-8 px-3 bg-black border-b-2 border-tt-cyan">
+          <div className="flex items-center gap-3 h-9 px-4 bg-black border-b-2 border-tt-cyan">
             <div className="flex gap-1.5" aria-hidden="true">
-              <span className="w-2.5 h-2.5 bg-tt-red" />
-              <span className="w-2.5 h-2.5 bg-tt-yellow" />
-              <span className="w-2.5 h-2.5 bg-tt-green" />
+              <span className="w-3 h-3 bg-tt-red" />
+              <span className="w-3 h-3 bg-tt-yellow" />
+              <span className="w-3 h-3 bg-tt-green" />
             </div>
-            <span className="truncate font-mono text-[10px] tracking-[0.14em] text-tt-green">
+            <span className="truncate font-mono text-xs tracking-[0.12em] text-tt-green">
               exe.ibaigarrido.dev
             </span>
           </div>
 
-          <div className="px-4 py-5 sm:px-5">
-            <h2 id="exe-popup-title" className="text-lg leading-tight">
+          <div className="px-5 py-6">
+            <h2 id="exe-popup-title" className="text-xl sm:text-2xl leading-snug">
               Tired of modern portfolios?
             </h2>
 
-            <p id="exe-popup-body" className="mt-2.5 text-[13px] leading-relaxed text-gray-600">
+            <p
+              id="exe-popup-body"
+              className="mt-3 text-[14px] sm:text-[15px] leading-[1.7] text-gray-600"
+            >
               Gradients, glassmorphism, a dark mode toggle nobody asked for. There's another
               version of me: hand-written HTML, Times New Roman and zero years of the five you
               require.
             </p>
 
-            <div className="mt-5 flex flex-col gap-2.5">
+            <div className="mt-6 flex flex-col gap-3">
               <a
                 ref={primaryRef}
                 href={EXE_URL}
@@ -303,18 +331,35 @@ const ExePopup = () => {
               </button>
             </div>
 
-            <p className="mt-3.5 text-[10px] font-mono text-gray-500">
+            <p className="mt-4 text-xs leading-relaxed font-mono text-gray-500">
               Warning: contains sarcasm about the junior job market.
             </p>
           </div>
 
-          <span className="crt-face" aria-hidden="true" />
+          <span className="crt-face crt-face--soft" aria-hidden="true" />
         </div>
       </dialog>
 
       {leaving && <TuneOut />}
-    </>
+    </ExeContext.Provider>
   );
 };
 
-export default ExePopup;
+/** The key in the window's title bar that opens and closes the card. */
+export const ExeTrigger = () => {
+  const state = useContext(ExeContext);
+  if (!state) return null;
+
+  return (
+    <button
+      ref={state.triggerRef}
+      type="button"
+      className="exe-trigger"
+      aria-expanded={state.open}
+      aria-controls="exe-popup"
+      onClick={state.toggle}
+    >
+      honest.exe
+    </button>
+  );
+};

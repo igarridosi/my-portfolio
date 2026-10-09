@@ -16,7 +16,7 @@ import {
 } from './components/Teletext/TeletextBars';
 import { PageWipe, usePageWipe } from './components/Teletext/PageWipe';
 import Contact from './components/Contact';
-import ExePopup from './components/ExePopup';
+import { ExeProvider, ExeTrigger } from './components/ExePopup';
 
 /* Spacing of the grid the trail snaps to, and the size of the block drawn on
    it - they are the same number on purpose. A block smaller than its cell
@@ -156,6 +156,7 @@ function AppLayout() {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
+      <ExeProvider>
       {/* Decorative only: never announced, never clickable. */}
       <div className="crt-bg" aria-hidden="true" />
       <div className="crt-overlay" aria-hidden="true" />
@@ -192,6 +193,11 @@ function AppLayout() {
             <span className="ml-3 sm:ml-4 font-mono text-[10px] sm:text-xs uppercase tracking-[0.2em] text-tt-cyan">
               Ibai Garrido
             </span>
+            {/* The way to the other portfolio: part of the window, in the
+                same corner on every page. */}
+            <div className="ml-auto">
+              <ExeTrigger />
+            </div>
           </div>
 
           {/* Address bar */}
@@ -282,8 +288,7 @@ function AppLayout() {
           <div className="crt-face" aria-hidden="true" />
         </div>
       </motion.div>
-
-      <ExePopup />
+      </ExeProvider>
     </motion.div>
   );
 }
