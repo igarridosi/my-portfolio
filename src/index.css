@@ -1449,59 +1449,88 @@ html {
   font-size: 1.05em;
 }
 
-/* --- the invitation to exe.ibaigarrido.dev --------------------------------- */
+/* --- exe.ibaigarrido.dev: the tab, the card and the way out -------------- */
 
-/* The <dialog> is only a frame for the panel inside it: no padding, so a click
-   on the element itself can only be a click on the backdrop; no border or
-   ground of its own, so what shows is the panel, drawn like every other window
-   on the site. */
+/* The tab. Always on screen, tucked against the right-hand edge: part of it
+   is pushed off the screen, so it reads as something filed away at the side
+   rather than a button asking to be pressed. Pointing at it or tabbing to it
+   brings it the rest of the way out, in the fastext yellow of the key you are
+   on. The hidden part is padding, so the label itself is never cut. */
+.exe-tab {
+  position: fixed;
+  right: 0;
+  bottom: 22vh;
+  z-index: 95;
+  padding: 0.9rem 0.95rem 0.9rem 0.4rem;
+  writing-mode: vertical-rl;
+  background: #000;
+  border: 2px solid #0ff;
+  border-right: 0;
+  color: #ff0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transform: translateX(0.55rem);
+  transition:
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 120ms linear,
+    color 120ms linear;
+}
+
+.exe-tab:hover,
+.exe-tab:focus-visible {
+  transform: translateX(0);
+  background: #ff0;
+  color: #000;
+  outline: none;
+}
+
+/* The card, in the bottom-right corner. A non-modal <dialog>: the browser's
+   own placement centres it, so it is put in the corner by hand. It comes out
+   of the edge the tab lives on and goes back into it. */
 .exe-popup {
-  /* A modal <dialog> centres itself with auto margins, and Tailwind's reset
-     sets every margin to zero - without this it opens in the top-left
-     corner. */
-  margin: auto;
-  width: min(92vw, 34rem);
+  position: fixed;
+  inset: auto 1.25rem 1.25rem auto;
+  z-index: 95;
+  margin: 0;
+  width: min(calc(100vw - 1.5rem), 23rem);
   max-width: none;
-  max-height: calc(100dvh - 2rem);
+  max-height: calc(100dvh - 2.5rem);
   padding: 0;
   border: 0;
   background: transparent;
   color: #fff;
   overflow: visible;
+  animation: exe-popup-in 460ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-.exe-popup::backdrop {
-  background: rgba(0, 0, 0, 0.72);
+.exe-popup.is-closing {
+  animation: exe-popup-out 280ms cubic-bezier(0.5, 0, 0.9, 0.4) forwards;
 }
 
-/* Switched on like a set rather than faded in: the picture opens from a line,
-   the same move the site makes when it changes channel. */
-.exe-popup[open] {
-  animation: exe-popup-on 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.exe-popup[open]::backdrop {
-  animation: exe-popup-dim 320ms ease-out;
-}
-
-@keyframes exe-popup-on {
-  0% {
-    opacity: 0;
-    transform: scaleY(0.02);
-  }
-  40% {
-    opacity: 1;
-    transform: scaleY(0.02);
-  }
-  100% {
-    opacity: 1;
-    transform: scaleY(1);
+@media (max-width: 639px) {
+  .exe-popup {
+    inset: auto 0.75rem 0.75rem auto;
   }
 }
 
-@keyframes exe-popup-dim {
+@keyframes exe-popup-in {
   from {
+    opacity: 0.3;
+    transform: translateX(calc(100% + 1.5rem));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes exe-popup-out {
+  to {
     opacity: 0;
+    transform: translateX(calc(100% + 1.5rem));
   }
 }
 
@@ -1513,14 +1542,15 @@ html {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.6rem 1rem;
+  padding: 0.55rem 0.9rem;
   border: 2px solid;
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-align: center;
   text-decoration: none;
+  cursor: pointer;
   transition:
     background-color 120ms linear,
     color 120ms linear,
@@ -1555,9 +1585,201 @@ html {
   outline-offset: 3px;
 }
 
+/* The way out: the whole set switching off, the way an old tube did, and the
+   other channel being tuned in on the dark screen.
+
+     0 -  560ms  the picture closes from top and bottom onto a bright line
+   380 - 1000ms  the line pulls in from both ends to a single point
+   950 - 1750ms  the point glows and fades, the afterglow of the phosphor
+  1300ms -       on black, the page number and "Tuning to..." come up
+          2200ms the browser leaves (TUNE_MS in ExePopup)
+
+   Nothing is cut: every stage starts before the last one has quite gone. */
+.exe-tune {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  overflow: hidden;
+  cursor: progress;
+}
+
+.exe-tune__shutter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 50.5%;
+  background: #000;
+  animation: exe-tune-shut 560ms cubic-bezier(0.6, 0, 0.3, 1) both;
+}
+
+.exe-tune__shutter--top {
+  top: 0;
+  transform-origin: top;
+}
+
+.exe-tune__shutter--bottom {
+  bottom: 0;
+  transform-origin: bottom;
+}
+
+.exe-tune__line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 3px;
+  margin-top: -1.5px;
+  background: #eaffff;
+  box-shadow: 0 0 22px 5px rgba(0, 255, 255, 0.7);
+  opacity: 0;
+  animation: exe-tune-line 620ms cubic-bezier(0.5, 0, 0.3, 1) 380ms both;
+}
+
+.exe-tune__dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 0 10px 4px rgba(255, 255, 255, 0.9),
+    0 0 34px 12px rgba(0, 255, 255, 0.55);
+  opacity: 0;
+  animation: exe-tune-dot 800ms ease-out 950ms both;
+}
+
+.exe-tune__caption {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 0.9em;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  font-size: clamp(0.7rem, 1.4vw, 0.95rem);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #0ff;
+  opacity: 0;
+  animation: exe-tune-caption 500ms steps(4, end) 1300ms both;
+}
+
+.exe-tune__page {
+  color: #ff0;
+}
+
+.exe-tune__cursor {
+  width: 0.6em;
+  height: 1em;
+  background: #0ff;
+  animation: exe-tune-blink 900ms steps(1, end) infinite;
+}
+
+@keyframes exe-tune-shut {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes exe-tune-line {
+  0% {
+    opacity: 0;
+    transform: scaleX(1);
+  }
+  18% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  92% {
+    opacity: 1;
+    transform: scaleX(0.004);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(0.004);
+  }
+}
+
+/* Starts invisible: the animation is held in its first frame for the whole of
+   its delay, and a first frame at full brightness put the dot on screen from
+   the very first moment, before the picture had even begun to close. */
+@keyframes exe-tune-dot {
+  0% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  6% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  25% {
+    opacity: 1;
+    transform: scale(1.25);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+}
+
+@keyframes exe-tune-caption {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes exe-tune-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes exe-tune-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Without the motion: the card and the tab simply appear, and the way out is
+   a short fade to black with the caption already on it. */
 @media (prefers-reduced-motion: reduce) {
-  .exe-popup[open],
-  .exe-popup[open]::backdrop {
+  .exe-tab {
+    transition: none;
+  }
+
+  .exe-popup,
+  .exe-popup.is-closing {
+    animation: none;
+  }
+
+  .exe-tune {
+    background: #000;
+    animation: exe-tune-fade 250ms ease-out both;
+  }
+
+  .exe-tune__shutter,
+  .exe-tune__line,
+  .exe-tune__dot {
+    display: none;
+  }
+
+  .exe-tune__caption {
+    opacity: 1;
+    animation: none;
+  }
+
+  .exe-tune__cursor {
     animation: none;
   }
 }
